@@ -1,0 +1,7 @@
+server:
+    port: 7801
+
+spring:
+    application:
+        name: user-server
+

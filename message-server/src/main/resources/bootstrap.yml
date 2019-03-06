@@ -1,0 +1,116 @@
+spring:
+    cloud:
+        config:
+#            uri: http://localhost:8082          #配置中心的具体地址
+            name: user-server            #对应{application}部分
+            profile: dev                         #对应{profile}部分
+            label: master                        #对应git的分支。如果配置中心使用的是本地存储，则该参数无用
+            discovery:
+                service-id: config-server      #指定配置中心的service-id，便于扩展为高可用配置集群。
+                enabled: true                   #开启Config服务发现支持
+
+              #配置重试机制
+            retry:
+                initial-interval: 2000
+                max-attempts: 2000
+                max-interval: 2000
+                multiplier: 1.2
+            fail-fast: true
+    datasource:
+        name: test
+        url: jdbc:mysql://47.106.149.105:3306/zjb?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
+        username: root
+        password: 123
+        # 使用druid数据源
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        filters: stat
+        maxActive: 20
+        initialSize: 1
+        maxWait: 60000
+        minIdle: 1
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: select 'x'
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        maxOpenPreparedStatements: 20
+    servlet:
+        multipart:
+            max-file-size: 50MB
+            max-request-size: 30MB
+    data:
+        mongodb:
+            normal:
+                database: zjb
+                host: 47.106.149.105
+                port: 27017
+                username: admin
+                password: 123
+            message:
+                database: message
+                host: 47.106.149.105
+                port: 27017
+                username: admin
+                password: 123
+    redis:
+        host: 47.106.149.105
+        port: 6379
+        password: rootredis
+        jedis:
+            pool:
+                max-active: 8
+    kafka:
+        bootstrap-servers: 47.106.149.105:9092
+        zookeeper:
+            connect: 47.106.149.105:2181
+        consumer:
+            group-id: defaultGroup
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.apache.kafka.common.serialization.StringSerializer
+            batch-size: 65536
+            buffer-memory: 524288
+
+eureka:
+    server:
+        url: localhost
+        port: 1111
+    client:
+#        healthcheck:
+#            enabled: true
+        service-url:
+            defaultZone: http://${eureka.server.url}:${eureka.server.port}/eureka/
+    instance:
+        lease-expiration-duration-in-seconds: 30
+        lease-renewal-interval-in-seconds: 20
+        instance-id: ${spring.cloud.client.ip-address}:${server.port}
+
+#        authentication-database: admin
+#        uri: mongodb://admin:123@47.106.149.105:27017/zjb
+
+mybatis:
+    mapper-locations: classpath:mapper/*.xml
+    type-aliases-package: com.renchaigao.zujuba.model
+
+mapper:
+    mappers:  com.renchaigao.zujuba.dao.mapper
+    not-empty: false
+    identity: MYSQL
+
+#pagehelper
+pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql
+    returnPageInfo: check
+
+
+
+

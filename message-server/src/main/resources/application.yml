@@ -1,0 +1,7 @@
+server:
+    port: 7812
+
+spring:
+    application:
+        name: player-server
+

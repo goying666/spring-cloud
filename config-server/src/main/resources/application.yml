@@ -1,0 +1,28 @@
+server:
+    port: 7815
+spring:
+    application:
+        name: config-server
+    cloud:
+        config:
+            server:
+                git:
+                    uri: https://github.com/goying666/zujuba-config
+                    username: 13040837899@163.com
+                    password: code666.
+                    search-paths: config-repo/{application}
+            label: master         #配置仓库的分支
+
+eureka:
+    server:
+        url: localhost
+        port: 7813
+    client:
+        healthcheck:
+            enabled: true
+        service-url:
+            defaultZone: http://${eureka.server.url}:${eureka.server.port}/eureka/
+    instance:
+        lease-expiration-duration-in-seconds: 30
+        lease-renewal-interval-in-seconds: 20
+        instance-id: ${spring.cloud.client.ip-address}:${server.port}
