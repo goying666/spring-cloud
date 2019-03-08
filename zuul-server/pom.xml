@@ -12,8 +12,12 @@
     <artifactId>zuul-server</artifactId>
     <packaging>jar</packaging>
 
-
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-zuul -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -25,6 +29,10 @@
                 </exclusion>
             </exclusions>
             <!--<version>2.0.3.RELEASE</version>-->
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
 
     </dependencies>

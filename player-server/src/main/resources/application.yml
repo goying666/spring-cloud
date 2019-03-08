@@ -1,7 +1,2 @@
 server:
     port: 7804
-
-spring:
-    application:
-        name: player-server
-

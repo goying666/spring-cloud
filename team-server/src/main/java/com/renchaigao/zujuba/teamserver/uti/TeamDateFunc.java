@@ -1,7 +1,5 @@
 package com.renchaigao.zujuba.teamserver.uti;
 
-import com.renchaigao.zujuba.mongoDB.info.team.TeamInfo;
-
 public class TeamDateFunc {
 
 //    处理team日期，将上传的date和time处理

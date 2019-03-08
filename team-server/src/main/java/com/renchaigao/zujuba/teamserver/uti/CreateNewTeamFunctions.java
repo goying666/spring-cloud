@@ -7,7 +7,6 @@ import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.dao.mapper.UserOpenInfoMapper;
 import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamInfo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -15,10 +14,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.*;
-import static com.renchaigao.zujuba.PropertiesConfig.GameConstant.GAME_AHSL;
-import static com.renchaigao.zujuba.PropertiesConfig.GameConstant.GAME_LRS;
-import static com.renchaigao.zujuba.PropertiesConfig.GameConstant.GAME_THQBY;
-import static com.renchaigao.zujuba.PropertiesConfig.KafkaTopicConstant.*;
+import static com.renchaigao.zujuba.PropertiesConfig.GameConstant.*;
+import static com.renchaigao.zujuba.PropertiesConfig.KafkaTopicConstant.CREATE_NEW_TEAM;
 
 public class CreateNewTeamFunctions {
 

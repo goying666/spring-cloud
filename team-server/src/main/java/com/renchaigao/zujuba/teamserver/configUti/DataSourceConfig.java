@@ -1,4 +1,4 @@
-package com.renchaigao.zujuba.teamserver.config;
+package com.renchaigao.zujuba.teamserver.configUti;
 
 import com.github.pagehelper.PageInterceptor;
 import org.apache.ibatis.plugin.Interceptor;

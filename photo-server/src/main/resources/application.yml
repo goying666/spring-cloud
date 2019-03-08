@@ -1,7 +1,2 @@
 server:
     port: 7811
-
-spring:
-    application:
-        name: photo-server
-

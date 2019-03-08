@@ -1,7 +1,2 @@
 server:
     port: 7809
-
-spring:
-    application:
-        name: place-server
-

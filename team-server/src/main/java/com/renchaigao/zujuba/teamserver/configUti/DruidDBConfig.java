@@ -1,4 +1,4 @@
-package com.renchaigao.zujuba.teamserver.config;
+package com.renchaigao.zujuba.teamserver.configUti;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import org.slf4j.Logger;

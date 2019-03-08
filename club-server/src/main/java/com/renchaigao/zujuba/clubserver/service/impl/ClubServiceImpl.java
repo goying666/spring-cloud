@@ -33,9 +33,9 @@ public class ClubServiceImpl implements ClubService {
 
     @Override
     public ResponseEntity CreateNewClub(String userId, String placeId, ClubInfo clubInfo) {
-        CreateNewClubInfoFunctions createNewClubInfoFunctions = new CreateNewClubInfoFunctions(userMapper,mongoTemplate,mongoTemplate,kafkaTemplate);
+        CreateNewClubInfoFunctions createNewClubInfoFunctions = new CreateNewClubInfoFunctions(userMapper,mongoTemplate,kafkaTemplate);
         //        检查参数完整性：id重复、名称重复；
-        createNewClubInfoFunctions
+        createNewClubInfoFunctions.cheackClubInfo(clubInfo);
 //        大本营选择的场所限制————待开发
 //        创建club
         mongoTemplate.save(clubInfo, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_CLUB_INFO);

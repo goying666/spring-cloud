@@ -2,20 +2,21 @@ server:
     port: 7815
 spring:
     application:
-        name: config-server
+        name: microservice-config-server
     cloud:
         config:
             server:
                 git:
-                    uri: https://github.com/goying666/zujuba-config
-                    username: 13040837899@163.com
-                    password: code666.
-                    search-paths: config-repo/{application}
-            label: master         #配置仓库的分支
+                    uri: https://github.com/goying666/config-server/
+#                    username: 13040837899@163.com
+#                    password: code666.
+#                    label: master
+
 
 eureka:
     server:
-        url: localhost
+#        url: localhost
+        url: 47.106.149.105
         port: 7813
     client:
         healthcheck:
@@ -26,3 +27,4 @@ eureka:
         lease-expiration-duration-in-seconds: 30
         lease-renewal-interval-in-seconds: 20
         instance-id: ${spring.cloud.client.ip-address}:${server.port}
+        prefer-ip-address: true

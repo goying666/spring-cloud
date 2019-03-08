@@ -9,28 +9,59 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>photo-server</artifactId>
     <packaging>jar</packaging>
-
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!--log4j-->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.10</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.renchaigao.zujuba</groupId>
+            <artifactId>merge</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.renchaigao.zujuba</groupId>
+            <artifactId>data20</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <!--kafka-->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
-
-
-        <dependency>
-            <groupId>com.renchaigao.zujuba</groupId>
-            <artifactId>data20</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <!--merge-->
-        <dependency>
-            <groupId>com.renchaigao.zujuba</groupId>
-            <artifactId>mergeJAR</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
 
         <dependency>
             <groupId>mysql</groupId>
@@ -92,4 +123,5 @@
         </dependency>
 
     </dependencies>
+
 </project>

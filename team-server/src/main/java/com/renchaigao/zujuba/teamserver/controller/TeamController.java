@@ -1,23 +1,22 @@
 package com.renchaigao.zujuba.teamserver.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.renchaigao.zujuba.dao.User;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
-import com.renchaigao.zujuba.mongoDB.info.user.UserInfo;
 import com.renchaigao.zujuba.teamserver.service.impl.TeamServiceImpl;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import org.springframework.kafka.core.KafkaTemplate;
 
 @Log4j
 @Controller
 @RequestMapping()
+@RestController
 public class TeamController {
+
     @Autowired
     TeamServiceImpl teamServiceImpl;
 

@@ -1,7 +1,2 @@
 server:
     port: 7802
-
-spring:
-    application:
-        name: team-server
-

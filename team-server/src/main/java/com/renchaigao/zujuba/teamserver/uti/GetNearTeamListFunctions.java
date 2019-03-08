@@ -7,7 +7,6 @@ import com.renchaigao.zujuba.dao.User;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.dao.mapper.UserOpenInfoMapper;
 import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
-import com.renchaigao.zujuba.mongoDB.info.PlayerInfo;
 import com.renchaigao.zujuba.mongoDB.info.store.StoreInfo;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamInfo;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamPlayerInfo;
@@ -22,9 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.*;
-import static com.renchaigao.zujuba.PropertiesConfig.PhotoConstant.HASL_GAME_IMAGE;
-import static com.renchaigao.zujuba.PropertiesConfig.PhotoConstant.LRS_GAME_IMAGE;
-import static com.renchaigao.zujuba.PropertiesConfig.PhotoConstant.THQBY_GAME_IMAGE;
+import static com.renchaigao.zujuba.PropertiesConfig.PhotoConstant.*;
 
 public class GetNearTeamListFunctions {
 
