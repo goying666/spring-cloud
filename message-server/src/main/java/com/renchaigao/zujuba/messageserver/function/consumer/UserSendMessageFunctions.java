@@ -42,12 +42,12 @@ public class UserSendMessageFunctions {
 //        新增信息至teamMessageInfo
         messageMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(messageContent.getTeamId())),
                 new Update().push("messageNoteInfoArrayList", messageContent),
-                MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_MESSAGE_INFO + messageContent.getTeamId());
+                MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_MESSAGE_INFO );
         if(!messageContent.getIsReceived()){
             //        用户未阅读该信息，新增信息至userMessages
             normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(messageContent.getSenderId())),
                     new Update().push("userTeamMessage", messageContent),
-                    MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE);
+                    MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO);
         }
     }
 

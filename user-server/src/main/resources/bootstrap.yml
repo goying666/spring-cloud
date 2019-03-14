@@ -5,7 +5,8 @@ spring:
         config:
             profile: dev
             label: master
-            name: normal
+            name: normal,mongo,user
+            fail-fast: true
             discovery:
                 enabled: true
                 service-id: microservice-config-server
@@ -15,8 +16,6 @@ eureka:
         url: ${aliyun.server}
         port: 7813
     client:
-#        healthcheck:
-#            enabled: true
         service-url:
             defaultZone: http://${eureka.server.url}:${eureka.server.port}/eureka/
     instance:
@@ -24,7 +23,7 @@ eureka:
         lease-renewal-interval-in-seconds: 20
         instance-id: ${spring.cloud.client.ip-address}:${server.port}
         prefer-ip-address: true
-        ip-address: ${aliyun.server}
+#        ip-address: ${aliyun.server}
 aliyun:
     server: 47.106.149.105
 

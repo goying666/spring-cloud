@@ -39,7 +39,7 @@ public class SignInUserFunctions {
      * 说明：发送验证码步骤
      */
     public ResponseEntity SignInUserGetVerCode(String phoneNumber) {
-        //没有注册过
+        //没有注册过————待开发
 //            查重
         List<User> userList = userMapper.selectByTelephone(phoneNumber);
         if (userList.size() > 0) {
@@ -120,6 +120,8 @@ public class SignInUserFunctions {
         CreatMyPermissionInfo(userId);
 //          创建user的openInfo
         CreatMyOpenInfo(user);
+//          创建user的ClubInfo
+        CreatMyClubInfo(user);
 //          组装userInfo
         userInfo = AssembleAllInfo(userId);
         mongoTemplate.save(userInfo);
@@ -144,11 +146,11 @@ public class SignInUserFunctions {
         //配置realName属性;
         user.setRealName("0");
         //配置nickName属性;
-        user.setNickName("0");
+        user.setNickName("用户" + UUIDUtil.getUUID().substring(0,5));
         //配置idCard属性;
         user.setIdCard("0");
         //配置gender属性;
-        user.setGender("0");
+        user.setGender("boy");
         //配置job属性;
         user.setJob("0");
         //配置telephone属性;
@@ -156,7 +158,7 @@ public class SignInUserFunctions {
         //配置marriage属性;
         user.setMarriage("0");
         //配置picPath属性;
-        user.setPicPath("0");
+        user.setPicPath("/system/user.jpg");
         //配置deleteStyle属性;
         user.setDeleteStyle(false);
         //配置upTime属性;
@@ -247,7 +249,7 @@ public class SignInUserFunctions {
     private void CreatMyMessageInfo(String userId) {
         UserMessagesInfo userMessagesInfo = new UserMessagesInfo();
         userMessagesInfo.setId(userId);
-        mongoTemplate.save(userMessagesInfo, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE);
+        mongoTemplate.save(userMessagesInfo, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO);
     }
 
     /*
@@ -281,6 +283,16 @@ public class SignInUserFunctions {
     /*
      * 说明：创建用户的 公开信息
      */
+    private void CreatMyClubInfo(User user) {
+        UserClubInfo userClubInfo = new UserClubInfo();
+        userClubInfo.setId(user.getId());
+        userClubInfo.setUserId(user.getId());
+        mongoTemplate.save(userClubInfo,MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_CLUB_INFO);
+    }
+
+    /*
+     * 说明：创建用户的 公开信息
+     */
     private void CreatMyOpenInfo(User user) {
         UserOpenInfo userOpenInfo = JSONObject.parseObject(JSONObject.toJSONString(user), UserOpenInfo.class);
         userOpenInfo.setUserId(userOpenInfo.getId());
@@ -302,11 +314,12 @@ public class SignInUserFunctions {
         userInfo.setUserPhotosInfo(mongoTemplate.findById(userId, UserPhotosInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_PHOTOS));
         userInfo.setAddressInfo(mongoTemplate.findById(userId, AddressInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_ADDRESS_INFO));
         userInfo.setUserSpendInfo(mongoTemplate.findById(userId, UserSpendInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_SPEND));
-        userInfo.setUserMessagesInfo(mongoTemplate.findById(userId, UserMessagesInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE));
+        userInfo.setUserMessagesInfo(mongoTemplate.findById(userId, UserMessagesInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO));
         userInfo.setUserFriendInfo(mongoTemplate.findById(userId, UserFriendInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_FRIEND));
         userInfo.setUserIntegrationInfo(mongoTemplate.findById(userId, UserIntegrationInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_INTEGRATION));
         userInfo.setUserPermissionInfo(mongoTemplate.findById(userId, UserPermissionInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_PERMISSION));
         userInfo.setUserOpenInfo(mongoTemplate.findById(userId, UserOpenInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_OPENINFO));
+        userInfo.setUserClubInfo(mongoTemplate.findById(userId, UserClubInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_CLUB_INFO));
         userInfo.setUpTime(dateUse.GetStringDateNow());
         return userInfo;
     }

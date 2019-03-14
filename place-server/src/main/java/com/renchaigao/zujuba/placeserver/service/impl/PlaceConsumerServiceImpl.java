@@ -29,30 +29,6 @@ public class PlaceConsumerServiceImpl implements PlaceConsumerService {
 
     @Override
     public void CreateNewTeam(TeamInfo teamInfo) {
-//        更新场地管理员的
-//        根据组局时间进行分类
-        switch (teamInfo.getAddressInfo().getAddressClass()) {
-            case ADDRESS_CLASS_USER:
-                break;
-            case ADDRESS_CLASS_STORE:
-                Update update = new Update();
-                mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(teamInfo.getAddressInfo().getId())),
-                        update.inc("allTeamsTimes", 1)
-//                        .inc("allUsersNum", 1)
-                                .set("upTime", dateUse.GetStringDateNow())
-                                .push("storeAllTeamInfoArrayList", teamInfo)
-                        , MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_TEAM_INFO);
-                logger.info("CreateNewTeam : " + teamInfo.getId());
-                break;
-            case ADDRESS_CLASS_OPEN:
-                break;
-            case ADDRESS_CLASS_HOME:
-                break;
-            case ADDRESS_CLASS_SCHOOL:
-                break;
-
-        }
-
 
     }
 }

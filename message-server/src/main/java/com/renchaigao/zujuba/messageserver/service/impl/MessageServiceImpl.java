@@ -56,8 +56,8 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public ResponseEntity GetMessageFragmentBean(String userId) {
-        GetMessageFragmentBeansFunctions getMessageFragmentBeansFunctions = new GetMessageFragmentBeansFunctions(userMapper, normalMongoTemplate, messageMongoTemplate, kafkaTemplate);
-        return new ResponseEntity(RespCode.SUCCESS, getMessageFragmentBeansFunctions.GetMessageFragmentBean(userId));
+        GetMessageFragmentBeansFunctions getMessageFragmentBeansFunctions = new GetMessageFragmentBeansFunctions(normalMongoTemplate, messageMongoTemplate);
+        return getMessageFragmentBeansFunctions.GetMessageFragmentBean(userId);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class MessageServiceImpl implements MessageService {
             case TEAM_SEND_MESSAGE:
 //                用户在组内发送的消息
                 addMessageInfoFunctions.AddTeamMessage(messageContent);
-                return GetMessageInfo(userid,messageContent.getTeamId(),TEAM_SEND_MESSAGE,messageContent.getSendTime());
+                return GetMessageInfo(userid, messageContent.getTeamId(), TEAM_SEND_MESSAGE, messageContent.getSendTime());
             case FRIEND_SEND_MESSAGE:
 //                用户发送给朋友的消息——待开发
                 break;
@@ -76,6 +76,9 @@ public class MessageServiceImpl implements MessageService {
                 break;
             case USER_SEND_MESSAGE:
 //                用户发送给其他用户的消息——待开发
+                break;
+            case CLUB_SEND_MESSAGE:
+
                 break;
         }
         return new ResponseEntity(RespCode.WARN, null);

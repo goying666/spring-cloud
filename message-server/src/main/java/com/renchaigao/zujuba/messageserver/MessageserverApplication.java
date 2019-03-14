@@ -5,15 +5,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableAutoConfiguration
-@SpringBootApplication(exclude = MongoAutoConfiguration.class)
+@SpringBootApplication(exclude = {MongoAutoConfiguration.class, MessageserverApplication.class})
 @MapperScan("com.renchaigao.zujuba.dao.mapper")
-@EnableScheduling
+//@EnableScheduling
+@Configuration
+@EnableEurekaClient
 public class MessageserverApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MessageserverApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MessageserverApplication.class, args);
+    }
 }

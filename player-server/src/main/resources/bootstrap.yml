@@ -5,7 +5,8 @@ spring:
         config:
             profile: dev
             label: master
-            name: normal
+            name: player,mongo,normal
+            fail-fast: true
             discovery:
                 enabled: true
                 service-id: microservice-config-server
@@ -15,8 +16,6 @@ eureka:
         url: ${aliyun.server}
         port: 7813
     client:
-#        healthcheck:
-#            enabled: true
         service-url:
             defaultZone: http://${eureka.server.url}:${eureka.server.port}/eureka/
     instance:

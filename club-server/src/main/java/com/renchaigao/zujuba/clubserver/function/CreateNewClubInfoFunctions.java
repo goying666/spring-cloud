@@ -2,17 +2,14 @@ package com.renchaigao.zujuba.clubserver.function;
 
 import com.alibaba.fastjson.JSONObject;
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
-import com.renchaigao.zujuba.PropertiesConfig.UserConstant;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
-import com.renchaigao.zujuba.mongoDB.info.PlayerInfo;
 import com.renchaigao.zujuba.mongoDB.info.club.ClubInfo;
-import com.renchaigao.zujuba.mongoDB.info.club.ClubTeamInfo;
+import com.renchaigao.zujuba.mongoDB.info.club.ClubMessageInfo;
 import com.renchaigao.zujuba.mongoDB.info.club.ClubUserInfo;
 import com.renchaigao.zujuba.mongoDB.info.message.MessageContent;
-import com.renchaigao.zujuba.mongoDB.info.team.TeamPlayerInfo;
-import com.renchaigao.zujuba.mongoDB.info.user.UserClubInfo;
+import com.renchaigao.zujuba.mongoDB.info.store.StoreInfo;
 import normal.dateUse;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -21,20 +18,23 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import static com.renchaigao.zujuba.PropertiesConfig.ClubConstant.ROLE_CREATER;
-import static com.renchaigao.zujuba.PropertiesConfig.KafkaTopicConstant.CREATE_NEW_CLUB;
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.*;
+import static com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_CLUB_MESSAGE_INFO;
 import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.GENDER_BOY;
 import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.GENDER_GIRL;
-import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.GENDER_NULL;
 
 public class CreateNewClubInfoFunctions {
 
-    UserMapper userMapper;
-    MongoTemplate normalMongoTemplate;
+    private UserMapper userMapper;
+    private MongoTemplate normalMongoTemplate;
+    private MongoTemplate messagelMongoTemplate;
+
     KafkaTemplate<String, String> kafkaTemplate;
 
-    public CreateNewClubInfoFunctions(UserMapper userMapper, MongoTemplate normalMongoTemplate, KafkaTemplate<String, String> kafkaTemplate) {
+    public CreateNewClubInfoFunctions(UserMapper userMapper, MongoTemplate normalMongoTemplate, MongoTemplate messagelMongoTemplate, KafkaTemplate<String, String> kafkaTemplate) {
         this.userMapper = userMapper;
         this.normalMongoTemplate = normalMongoTemplate;
+        this.messagelMongoTemplate = messagelMongoTemplate;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -62,10 +62,8 @@ public class CreateNewClubInfoFunctions {
         userPart(clubInfo);
 //        3、组局信息部分
         teamPart(clubInfo);
-//        4、消息信息部分
+//        4、消息信息部分 和 人员相关信息（场地管理者和创建者的基本信息）
         messagePart(clubInfo);
-//        5、创建者信息部分
-        createrPart(clubInfo);
         return new ResponseEntity(RespCode.SUCCESS, clubInfo);
     }
 
@@ -82,8 +80,10 @@ public class CreateNewClubInfoFunctions {
                 break;
         }
         clubInfo.setAllPeopleNum(clubInfo.getAllPeopleNum() + 1);
-        clubInfo.setRenameTimesLimit(3);
+        clubInfo.setRenameTimesLimit(CONFIG_RENAME_CLUB_TIMES);
+        String placeAdminId = normalMongoTemplate.findById(clubInfo.getPlaceId(), StoreInfo.class,MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO).getOwnerId();
         clubInfo.getUserIdList().add(clubInfo.getCreaterId());
+        clubInfo.getUserIdList().add(placeAdminId);
     }
 
     private void userPart(ClubInfo clubInfo) {
@@ -96,19 +96,54 @@ public class CreateNewClubInfoFunctions {
     }
 
     private void teamPart(ClubInfo clubInfo) {
-
+//        ClubTeamInfo clubTeamInfo = new ClubTeamInfo();
+//        clubTeamInfo.setId(clubInfo.getId());
+//        clubTeamInfo.setClubId(clubInfo.getId());
     }
 
     private void messagePart(ClubInfo clubInfo) {
-//        通过kafka发送一个createNewClub的消息给message-server；
-        kafkaTemplate.send(CREATE_NEW_CLUB, JSONObject.toJSONString(clubInfo));
-//        验证kafka的消息成功完成任务；——待开发
-    }
+//        修改场地相关信息
+        normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(clubInfo.getPlaceId())),
+                new Update().push("StoreClubArray",clubInfo.getId()),MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
+//        场地信息人发言
+        MessageContent userMessageContent = new MessageContent();
+        Long nowTimeLong = dateUse.getNowTimeLong();
+        userMessageContent.setIsMe(true);
+        userMessageContent.setContent("大家好，我是俱乐部所在场地的负责人，有关场地的任何问题可以咨询我，祝您玩的愉快。");
+        String placeAdminId = normalMongoTemplate.findById(clubInfo.getPlaceId(), StoreInfo.class,MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO).getOwnerId();
+        userMessageContent.setTitle(clubInfo.getClubName());
+        userMessageContent.setSenderId(placeAdminId);
+        userMessageContent.setMessageClass(CLUB_SEND_MESSAGE);
+        userMessageContent.setSendTime(nowTimeLong);
+        userMessageContent.setIdLong(nowTimeLong);
+        userMessageContent.setUserId(placeAdminId);
+        userMessageContent.setSenderImageUrl(userMapper.selectByPrimaryKey(placeAdminId).getPicPath());
+        userMessageContent.setClubId(clubInfo.getId());
+        userMessageContent.getReadList().addAll(clubInfo.getUserIdList());//增加消息阅读者——创建地的管理员 和 创建人
+        kafkaTemplate.send(CLUB_SEND_MESSAGE, JSONObject.toJSONString(userMessageContent));
 
-    private void createrPart(ClubInfo clubInfo) {
-//        通过kafka发送一个createNewClub的消息给message-server；
-        kafkaTemplate.send(CREATE_NEW_CLUB, JSONObject.toJSONString(clubInfo));
-        //        验证kafka的消息成功完成任务；——待开发
+//        创建者的发言
+        userMessageContent = new MessageContent();
+        nowTimeLong = dateUse.getNowTimeLong();
+        userMessageContent.setIsMe(true);
+        userMessageContent.setContent("Hi~我 创建 了这个组局，欢迎你的参与，祝玩的愉快~");
+        userMessageContent.setTitle(clubInfo.getClubName());
+        userMessageContent.setSenderId(clubInfo.getCreaterId());
+        userMessageContent.setMessageClass(CLUB_SEND_MESSAGE);
+        userMessageContent.setSendTime(nowTimeLong);
+        userMessageContent.setIdLong(nowTimeLong);
+        userMessageContent.setUserId(clubInfo.getCreaterId());
+        userMessageContent.setSenderImageUrl(userMapper.selectByPrimaryKey(clubInfo.getCreaterId()).getPicPath());
+        userMessageContent.setClubId(clubInfo.getId());
+        userMessageContent.getReadList().addAll(clubInfo.getUserIdList());//增加消息阅读者——创建地的管理员 和 创建人
+        kafkaTemplate.send(CLUB_SEND_MESSAGE, JSONObject.toJSONString(userMessageContent));
+
+//        修改场地负责人的场地信息
+        normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(placeAdminId)),
+                new Update().push("clubIdList",clubInfo.getId()),MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_CLUB_INFO);
+//        创建人的相关信息更新
+        normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(clubInfo.getCreaterId()))
+                ,new Update().push("myClubList",clubInfo.getId()).push("clubIdList",clubInfo.getId()),MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_CLUB_INFO);
     }
 
 }

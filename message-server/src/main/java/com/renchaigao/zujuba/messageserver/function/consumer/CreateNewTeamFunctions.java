@@ -40,7 +40,7 @@ public class CreateNewTeamFunctions {
         teamMessageInfo.setCreateId(teamInfo.getCreaterId());
         teamMessageInfo.setPlaceAdminId(teamInfo.getAddressInfo().getOwnerId());
         messageMongoTemplate.save(teamMessageInfo,
-                MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_MESSAGE_INFO + teamInfo.getId());
+                MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_MESSAGE_INFO);
     }
 
     public void CreaterPart(TeamInfo teamInfo) {

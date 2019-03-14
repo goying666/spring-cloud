@@ -3,9 +3,6 @@ package com.renchaigao.zujuba.teamserver.uti;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
-import com.renchaigao.zujuba.dao.User;
-import com.renchaigao.zujuba.dao.mapper.UserMapper;
-import com.renchaigao.zujuba.dao.mapper.UserOpenInfoMapper;
 import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
 import com.renchaigao.zujuba.mongoDB.info.store.StoreInfo;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamInfo;
@@ -18,47 +15,41 @@ import store.DistanceFunc;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.*;
 import static com.renchaigao.zujuba.PropertiesConfig.PhotoConstant.*;
 
 public class GetNearTeamListFunctions {
 
-    UserOpenInfoMapper userOpenInfoMapper;
-    UserMapper userMapper;
-    MongoTemplate mongoTemplate;
+    private MongoTemplate mongoTemplate;
 
-    public GetNearTeamListFunctions(UserMapper userMapper, MongoTemplate mongoTemplate, UserOpenInfoMapper userOpenInfoMapper) {
-        this.userMapper = userMapper;
+    public GetNearTeamListFunctions(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
-        this.userOpenInfoMapper = userOpenInfoMapper;
     }
 
     /*
      * 说明：获取原始信息 teamInfoList
      */
     public ArrayList<TeamInfo> GetNearTeamInfoListByUserId(String userId) {
-        User user = userMapper.selectByPrimaryKey(userId);
         AddressInfo userAddress = mongoTemplate.findById(userId, AddressInfo.class);
-        String userCityCode = userAddress.getCitycode();
-        Double userX = userAddress.getLatitude(), userY = userAddress.getLongitude();
+        String userCityCode = userAddress != null ? userAddress.getCitycode() : "0755";
+        Double userX = userAddress != null ? userAddress.getLatitude() : 0, userY = userAddress != null ? userAddress.getLongitude() : 0;
         List<TeamInfo> teamInfos = mongoTemplate.find(
                 Query.query(Criteria.where("addressInfo.citycode").is(userCityCode)), TeamInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_INFO);
-        for (int i = 0; i < teamInfos.size(); i++) {
-            teamInfos.get(i).getAddressInfo().setDistance(DistanceFunc.getDistance(userX, userY,
-                    teamInfos.get(i).getAddressInfo().getLatitude(),
-                    teamInfos.get(i).getAddressInfo().getLongitude())
+        for (TeamInfo teamInfo : teamInfos) {
+            teamInfo.getAddressInfo().setDistance(DistanceFunc.getDistance(userX, userY,
+                    teamInfo.getAddressInfo().getLatitude(),
+                    teamInfo.getAddressInfo().getLongitude())
             );
         }
-        Collections.sort(teamInfos, new Comparator<TeamInfo>() {
-            @Override
-            public int compare(TeamInfo o1, TeamInfo o2) {
+        teamInfos.sort((o1, o2) -> {
 //                    从小到大
-                return (int) (o1.getAddressInfo().getDistance() - o2.getAddressInfo().getDistance());
+            return (o1.getAddressInfo().getDistance() - o2.getAddressInfo().getDistance());
 //                    从大到小
 //                return (int)(o2.getDistance() - o1.getDistance());
-            }
         });
         return new ArrayList<>(teamInfos);
     }
@@ -74,11 +65,11 @@ public class GetNearTeamListFunctions {
             json.put("teamId", o.getId());
             json.put("name", o.getTeamName());
 //            图片
-            if(o.getTeamGameInfo().isSelect_LRS()){
+            if (o.getTeamGameInfo().isSelect_LRS()) {
                 json.put("imageurl", LRS_GAME_IMAGE);
-            }else if(o.getTeamGameInfo().isSelect_THQBY()){
+            } else if (o.getTeamGameInfo().isSelect_THQBY()) {
                 json.put("imageurl", THQBY_GAME_IMAGE);
-            }else if(o.getTeamGameInfo().isSelect_MXTSJ()){
+            } else if (o.getTeamGameInfo().isSelect_MXTSJ()) {
                 json.put("imageurl", HASL_GAME_IMAGE);
             }
 
@@ -108,15 +99,12 @@ public class GetNearTeamListFunctions {
                     StoreInfo storeInfo = mongoTemplate.findById(
                             o.getAddressInfo().getId(), StoreInfo.class,
                             MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
-                    if (storeInfo == null) {
-
-                    }
-                    json.put("place", storeInfo.getName());
+                    json.put("place", storeInfo != null ? storeInfo.getName() : "place");
 //                    __后期需要修改成 店铺的特殊标识，现在暂用“5分”替代
                     json.put("placeNote", "5分");
-                    json.put("ownerid", storeInfo.getOwnerId());
-                    json.put("placeid", storeInfo.getId());
-                    json.put("placeName", storeInfo.getName());
+                    json.put("ownerid", storeInfo != null ? storeInfo.getOwnerId() : "ownerid");
+                    json.put("placeid", storeInfo != null ? storeInfo.getId() : "placeid");
+                    json.put("placeName", storeInfo != null ? storeInfo.getName() : "placeName");
                     break;
                 case ADDRESS_CLASS_OPEN:
                     break;
@@ -134,9 +122,9 @@ public class GetNearTeamListFunctions {
                 json.put("distance", o.getAddressInfo().getDistance().toString() + "米");
             }
             TeamPlayerInfo teamPlayerInfo = mongoTemplate.findById(o.getId(), TeamPlayerInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_PLAYER_INFO);
-            json.put("boynum", teamPlayerInfo.getBoySum().toString());
-            json.put("girlnum", teamPlayerInfo.getGirlSum().toString());
-            int currentPlayerNum = teamPlayerInfo.getPlayerArrayList().size(),
+            json.put("boynum", teamPlayerInfo != null ? teamPlayerInfo.getBoySum().toString() : 0);
+            json.put("girlnum", teamPlayerInfo != null ? teamPlayerInfo.getGirlSum().toString() : 0);
+            int currentPlayerNum = teamPlayerInfo != null ? teamPlayerInfo.getPlayerArrayList().size() : 0,
                     minPlayerNum = o.getPlayerMin(), maxPlayerNum = o.getPlayerMax();
             if (currentPlayerNum < minPlayerNum) {
                 json.put("currentPlayer", "(差" + String.valueOf(minPlayerNum - currentPlayerNum) + "人)");
@@ -177,7 +165,7 @@ public class GetNearTeamListFunctions {
             }
             json.put("realDistance", o.getAddressInfo().getDistance());
             json.put("realStartTime", calendar.getTimeInMillis());
-            json.put("realPlayerNum", teamPlayerInfo.getPlayerArrayList().size());
+            json.put("realPlayerNum", teamPlayerInfo != null ? teamPlayerInfo.getPlayerArrayList().size() : 0);
             jsonArray.add(json);
         }
         return jsonArray;

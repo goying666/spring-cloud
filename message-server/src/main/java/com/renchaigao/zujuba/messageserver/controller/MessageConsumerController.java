@@ -22,11 +22,11 @@ public class MessageConsumerController {
     @Autowired
     MessageServiceImpl messageServiceImpl;
 
-    @KafkaListener(topics = CREATE_NEW_TEAM)
-    public void CreateNewTeam(ConsumerRecord<?, String> record) {
-        TeamInfo teamInfo = JSONObject.parseObject(record.value(),TeamInfo.class);
-        messageConsumerServiceImpl.CreateNewTeam(teamInfo);
-    }
+//    @KafkaListener(topics = CREATE_NEW_TEAM)
+//    public void CreateNewTeam(ConsumerRecord<?, String> record) {
+//        TeamInfo teamInfo = JSONObject.parseObject(record.value(),TeamInfo.class);
+//        messageConsumerServiceImpl.CreateNewTeam(teamInfo);
+//    }
 
     @KafkaListener(topics = SYSTEM_SEND_MESSAGE)
     public void SystemSendMessage(ConsumerRecord<?, String> record) {
@@ -47,6 +47,11 @@ public class MessageConsumerController {
     public void FRIEND_SEND_MESSAGE(ConsumerRecord<?, String> record) {
         MessageContent messageContent = JSONObject.parseObject(record.value(),MessageContent.class);
         messageConsumerServiceImpl.FriendSendMessage(messageContent);
+    }
+    @KafkaListener(topics = CLUB_SEND_MESSAGE)
+    public void CLUB_SEND_MESSAGE(ConsumerRecord<?, String> record) {
+        MessageContent messageContent = JSONObject.parseObject(record.value(),MessageContent.class);
+        messageConsumerServiceImpl.ClubSendMessage(messageContent);
     }
 
 }

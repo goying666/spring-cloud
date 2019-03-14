@@ -37,27 +37,43 @@ public class MessageConsumerServiceImpl implements MessageConsumerService {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    @Override
-    public void CreateNewTeam(TeamInfo teamInfo) {
-        CreateNewTeamFunctions createNewTeamFunctions = new CreateNewTeamFunctions(userMapper, normalMongoTemplate, messageMongoTemplate, kafkaTemplate);
-//        创建team对应的message
-        createNewTeamFunctions.CreateTeamMessageInfo(teamInfo);
-//        系统发送一个通知给创建者 并且 创建者发送一个team的message
-        createNewTeamFunctions.CreaterPart(teamInfo);
-//        系统发送一个通知给管理员 并且 管理员发送一个team的message
-        createNewTeamFunctions.AdminPart(teamInfo);
-    }
+//    @Override
+//    public void CreateNewTeam(TeamInfo teamInfo) {
+////        CreateNewTeamFunctions createNewTeamFunctions = new CreateNewTeamFunctions(userMapper, normalMongoTemplate, messageMongoTemplate, kafkaTemplate);
+//////        创建team对应的message
+////        createNewTeamFunctions.CreateTeamMessageInfo(teamInfo);
+//////        系统发送一个通知给创建者 并且 创建者发送一个team的message
+////        createNewTeamFunctions.CreaterPart(teamInfo);
+//////        系统发送一个通知给管理员 并且 管理员发送一个team的message
+////        createNewTeamFunctions.AdminPart(teamInfo);
+//    }
 
     @Override
     public void SystemSendMessage(MessageContent messageContent) {
 //        1、保存系统消息到user的消息表里
         messageMongoTemplate.save(messageContent,
-                MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE + messageContent.getUserId());
+                MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO);
 //        2、修改user的消息统计数据userMessageInfo;
         normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(messageContent.getUserId())),
                 new Update().inc("nowSystemMessagesNumber", 1)
                         .push("userSystemMessageIdList", messageContent.getId())
-                , MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO+ messageContent.getUserId());
+                , MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO);
+    }
+
+    @Override
+    public void ClubSendMessage(MessageContent messageContent) {
+//        保存club消息到club 的消息表里
+        messageMongoTemplate.save(messageContent,
+                MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_CLUB_MESSAGE_INFO);
+//        1、保存系统消息到user的消息表里
+        messageMongoTemplate.save(messageContent,
+                MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO);
+//        2、修改user的消息统计数据userMessageInfo;
+        normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(messageContent.getUserId())),
+                new Update().inc("nowClubMessagesNumber", 1)
+                        .push("userClubMessageIdList", messageContent.getId())
+                , MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO);
+
     }
 
     @Override
@@ -69,4 +85,5 @@ public class MessageConsumerServiceImpl implements MessageConsumerService {
     public void UserSendMessage(MessageContent messageContent) {
 
     }
+
 }

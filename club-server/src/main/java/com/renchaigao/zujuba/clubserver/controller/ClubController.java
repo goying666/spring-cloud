@@ -15,14 +15,6 @@ public class ClubController {
     @Autowired
     ClubServiceImpl clubServiceImpl;
 
-
-//    @GetMapping(value = "/getall")
-//    @ResponseBody
-//    public ResponseEntity GetMessageFragmentBean(
-//            @RequestParam(value = "userId") String userId) {
-//        return messageServiceImpl.GetMessageFragmentBean(userId);
-//    }
-
     @PostMapping(value = "/create", consumes = "application/json")
     @ResponseBody
     public ResponseEntity CreateNewClub(
@@ -30,6 +22,14 @@ public class ClubController {
             @RequestParam(value = "placeId") String placeId,
             @RequestBody ClubInfo clubInfo) {
         return clubServiceImpl.CreateNewClub(userId, placeId, clubInfo);
+    }
+
+    @GetMapping(value = "/getall")
+    @ResponseBody
+    public ResponseEntity GetUserAllClub(
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "token") String token) {
+        return clubServiceImpl.GetUserAllClub(userId, token);
     }
 
 }

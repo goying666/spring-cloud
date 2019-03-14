@@ -2,7 +2,6 @@ package com.renchaigao.zujuba.playerserver.function.consumer;
 
 
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
-import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.dao.mapper.UserOpenInfoMapper;
 import com.renchaigao.zujuba.mongoDB.info.PlayerInfo;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamInfo;
@@ -13,20 +12,16 @@ import store.DistanceFunc;
 
 import java.util.ArrayList;
 
-import static com.renchaigao.zujuba.PropertiesConfig.PlayerConstant.PLAYER_COME_FROM;
-import static com.renchaigao.zujuba.PropertiesConfig.PlayerConstant.PLAYER_ROLE;
-import static com.renchaigao.zujuba.PropertiesConfig.PlayerConstant.PLAYER_STATE;
-import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.*;
+import static com.renchaigao.zujuba.PropertiesConfig.PlayerConstant.*;
+import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.USER_GENDER;
 
 public class CreateNewTeamFunctions {
 
-    UserMapper userMapper;
-    UserOpenInfoMapper userOpenInfoMapper;
-    MongoTemplate mongoTemplate;
+    private UserOpenInfoMapper userOpenInfoMapper;
+    private MongoTemplate mongoTemplate;
 
 
-    public CreateNewTeamFunctions(UserMapper userMapper, MongoTemplate mongoTemplate, UserOpenInfoMapper userOpenInfoMapper) {
-        this.userMapper = userMapper;
+    public CreateNewTeamFunctions(MongoTemplate mongoTemplate, UserOpenInfoMapper userOpenInfoMapper) {
         this.mongoTemplate = mongoTemplate;
         this.userOpenInfoMapper = userOpenInfoMapper;
     }
@@ -40,8 +35,8 @@ public class CreateNewTeamFunctions {
         playerInfo.setHomeOwner(PLAYER_ROLE[0]);//creater
         playerInfo.setDistance(DistanceFunc.getDistance(teamInfo.getAddressInfo().getLatitude(),
                 teamInfo.getAddressInfo().getLongitude(),
-                userInfo.getAddressInfo().getLatitude(),
-                userInfo.getAddressInfo().getLongitude()));
+                userInfo != null ? userInfo.getAddressInfo().getLatitude() : 0,
+                userInfo != null ? userInfo.getAddressInfo().getLongitude() : 0));
         playerInfo.setComeFrom(PLAYER_COME_FROM[0]);
         playerInfo.setState(PLAYER_STATE[0]);
         playerInfo.setPlayerNumber(0); //玩家编号
@@ -58,7 +53,7 @@ public class CreateNewTeamFunctions {
         teamPlayerInfo.setTeamId(teamInfo.getId());
         teamPlayerInfo.setPlayerArrayList(new ArrayList<>());
         teamPlayerInfo.getPlayerArrayList().add(createrPlayerInfo);
-        if (userInfo.getGender().equals(USER_GENDER[0])) {
+        if (userInfo == null || userInfo.getGender().equals(USER_GENDER[0])) {
 //            性别未定
             teamPlayerInfo.setBoySum(0);
             teamPlayerInfo.setGirlSum(0);

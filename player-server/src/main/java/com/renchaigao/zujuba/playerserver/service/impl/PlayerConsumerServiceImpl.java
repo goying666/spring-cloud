@@ -17,7 +17,6 @@ public class PlayerConsumerServiceImpl implements PlayerConsumerService {
 
     private static Logger logger = Logger.getLogger(PlayerConsumerServiceImpl.class);
 
-
     @Autowired
     UserMapper userMapper;
 
@@ -29,7 +28,7 @@ public class PlayerConsumerServiceImpl implements PlayerConsumerService {
 
     @Override
     public void CreateNewTeam(TeamInfo teamInfo) {
-        CreateNewTeamFunctions createNewTeamFunctions = new CreateNewTeamFunctions(userMapper,mongoTemplate,userOpenInfoMapper);
+        CreateNewTeamFunctions createNewTeamFunctions = new CreateNewTeamFunctions(mongoTemplate,userOpenInfoMapper);
 //        创建房主的player信息
         PlayerInfo createrPlayerInfo = createNewTeamFunctions.CreateOwnerPlayerInfo(teamInfo);
         logger.info(createrPlayerInfo);

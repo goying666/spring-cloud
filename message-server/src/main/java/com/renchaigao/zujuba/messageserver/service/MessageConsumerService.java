@@ -5,9 +5,10 @@ import com.renchaigao.zujuba.mongoDB.info.team.TeamInfo;
 
 public interface MessageConsumerService {
 
-    void CreateNewTeam(TeamInfo teamInfo);
+//    void CreateNewTeam(TeamInfo teamInfo);
     void SystemSendMessage(MessageContent messageContent);
     void FriendSendMessage(MessageContent messageContent);
     void UserSendMessage(MessageContent messageContent);
+    void ClubSendMessage(MessageContent messageContent);
 
 }

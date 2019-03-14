@@ -5,7 +5,8 @@ spring:
         config:
             profile: dev
             label: master
-            name: normal
+            name: normal,mongo,photo
+            fail-fast: true
             discovery:
                 enabled: true
                 service-id: microservice-config-server

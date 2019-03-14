@@ -70,7 +70,7 @@ public class UpdateUserFunctions {
         userInfo.setUserPhotosInfo(mongoTemplate.findById(userId, UserPhotosInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_PHOTOS));
         userInfo.setAddressInfo(mongoTemplate.findById(userId, AddressInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_ADDRESS_INFO));
         userInfo.setUserSpendInfo(mongoTemplate.findById(userId, UserSpendInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_SPEND));
-        userInfo.setUserMessagesInfo(mongoTemplate.findById(userId, UserMessagesInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE));
+        userInfo.setUserMessagesInfo(mongoTemplate.findById(userId, UserMessagesInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO));
         userInfo.setUserFriendInfo(mongoTemplate.findById(userId, UserFriendInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_FRIEND));
         userInfo.setUserIntegrationInfo(mongoTemplate.findById(userId, UserIntegrationInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_INTEGRATION));
         userInfo.setUserPermissionInfo(mongoTemplate.findById(userId, UserPermissionInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_PERMISSION));

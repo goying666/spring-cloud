@@ -8,7 +8,8 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(exclude = {UserServerApplication.class})
+@SpringBootApplication
+//@SpringBootApplication(exclude = {UserServerApplication.class})
 @EnableAutoConfiguration
 @MapperScan("com.renchaigao.zujuba.dao.mapper")
 //@EnableScheduling

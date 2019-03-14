@@ -42,20 +42,20 @@ public class GetMessageInfoFunctions {
                                 .addCriteria(Criteria.where("messageClass").is(TEAM_SEND_MESSAGE))
                                 .addCriteria(Criteria.where("isReceived").is(false))
 //                                .addCriteria(Criteria.where("sendTime").gt(lastTime))
-                        , MessageContent.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE + userid));
+                        , MessageContent.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO ));
         messageMongoTemplate.updateMulti(
                 Query.query(Criteria.where("teamId").is(teamId))
                         .addCriteria(Criteria.where("messageClass").is(TEAM_SEND_MESSAGE))
                         .addCriteria(Criteria.where("isReceived").is(false))
 //                        .addCriteria(Criteria.where("sendTime").gt(lastTime))
                 , new Update().set("isReceived", true)
-                , MessageContent.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE + userid);
+                , MessageContent.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO );
 //
 //        ArrayList<MessageContent> messageContentList = new ArrayList<>(
 //                messageMongoTemplate.find(
 //                        Query.query(Criteria.where("teamId").is(teamId))
 //                                .addCriteria(Criteria.where("sendTime").gt(lastTime))
-//                        , MessageContent.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE + userid));
+//                        , MessageContent.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO + userid));
 
         if (messageContentList.size() > 0) {
             return new ResponseEntity(RespCode.SUCCESS, messageContentList);
