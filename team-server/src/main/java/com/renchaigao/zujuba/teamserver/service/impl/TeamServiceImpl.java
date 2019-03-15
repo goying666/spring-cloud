@@ -12,13 +12,16 @@ import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
 import com.renchaigao.zujuba.mongoDB.info.PlayerInfo;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamInfo;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamPlayerInfo;
+import com.renchaigao.zujuba.mongoDB.info.user.UserInfo;
 import com.renchaigao.zujuba.mongoDB.info.user.UserTeams;
 import com.renchaigao.zujuba.teamserver.service.TeamService;
 import com.renchaigao.zujuba.teamserver.uti.CreateNewTeamFunctions;
 import com.renchaigao.zujuba.teamserver.uti.GetNearTeamListFunctions;
 import com.renchaigao.zujuba.teamserver.uti.GetOneTeamFunctions;
+import com.renchaigao.zujuba.teamserver.uti.JoinTeamFunctions;
 import normal.dateUse;
 import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -30,6 +33,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Calendar;
+
+import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.GENDER_BOY;
 
 @Service
 public class TeamServiceImpl implements TeamService {
@@ -116,63 +121,25 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public ResponseEntity JoinTeam(String userId, String teamId, String jsonObjectString) {
-
-        Long funBegin = Calendar.getInstance().getTimeInMillis();
-//        获取team信息，
-        TeamInfo teamInfo = normalMongoTemplate.findById(teamId, TeamInfo.class, "teamInfo");
-//        获取team的筛选信息，判断加入的用户是否满足，若不满足则返回相应的提示。
-
-//        增加用户信息
-        UserOpenInfo userOpenInfo = normalMongoTemplate.findById(userId, UserOpenInfo.class, "userOpenInfo");
-//        获取用户是否已存在，
+    public ResponseEntity JoinTeam(String userId, String teamId) {
         TeamPlayerInfo teamPlayerInfo = normalMongoTemplate.findOne(Query.query(Criteria.where("teamId").is(teamId)),
-                TeamPlayerInfo.class, "teamPlayerInfo");
+                TeamPlayerInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_PLAYER_INFO);
+//        检查是否已经存在在队伍中了
         if (teamPlayerInfo != null) {
             for (PlayerInfo s : teamPlayerInfo.getPlayerArrayList()) {
                 if (s.getId().equals(userId))
-                    return new ResponseEntity(RespCode.TEAM_HAD_BEEN_JOIN, teamInfo);
+                    return new ResponseEntity(RespCode.TEAM_HAD_BEEN_JOIN, null);
             }
         }
-        PlayerInfo playerInfo = new PlayerInfo();
-//        将user的信息填入playerInfo中
-        playerInfo.setId(userId);
-        playerInfo.setHomeOwner("0");
-        playerInfo.setUserOpenInfo(userOpenInfo);
-        playerInfo.setState("JOIN");
-        playerInfo.setComeFrom("T");
-        playerInfo.setJoinTime(dateUse.GetStringDateNow());
-        normalMongoTemplate.save(playerInfo, "playerInfo");
-//        用户距离————待开发；
-//        修改teamPlayerInfo内的内容；
-//        修改男女数量,并添加用户player信息；
-        Update update = new Update();
-//        如果有性别限制，则进行男女人数统计
-//        if (userOpenInfo.getGender().equals("B")) {
-//            update.inc("boySum", 1);
-//        } else {
-//            update.inc("girlSum", 1);
-//        }
-        update.inc("watingSum", 1).push("playerArrayList", playerInfo);
-        normalMongoTemplate.updateFirst(Query.query(Criteria.where("teamId").is(teamId)), update,
-                TeamPlayerInfo.class, "teamPlayerInfo");
-
-//        更新用户的team信息
-        normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(userId)),
-                new Update().push("doingTeamsList", teamId).push("allTeamsList", teamId),
-                UserTeams.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_TEAMS);
-
-        if (teamInfo != null) {
-            teamInfo.setTeamPlayerInfo(normalMongoTemplate.findOne(Query.query(Criteria.where("teamId").is(teamId)),
-                    TeamPlayerInfo.class, "teamPlayerInfo"));
+        JoinTeamFunctions joinTeamFunctions = new JoinTeamFunctions(userMapper, normalMongoTemplate, userOpenInfoMapper, kafkaTemplate);
+        try {
+            joinTeamFunctions.FilterPart(userId, teamId);
+            joinTeamFunctions.TeamPart(userId, teamId, teamPlayerInfo);
+            joinTeamFunctions.UserPart(userId, teamId);
+            return new ResponseEntity(RespCode.TEAM_JOIN_SUCCESS, null);
+        } catch (Exception e) {
+            return new ResponseEntity(RespCode.TEAM_JOIN_FAIL, e);
         }
-
-        teamInfo = normalMongoTemplate.findById(teamId, TeamInfo.class, "teamInfo");
-        Long funEnd = Calendar.getInstance().getTimeInMillis();
-        logger.info("This function spend times : " + (funEnd - funBegin) / 60000 + "m"
-                + (funEnd - funBegin) / 1000 + "s" + (funEnd - funBegin) % 1000 + "ms");
-        return new ResponseEntity(RespCode.SUCCESS, teamInfo);
-
     }
 
 

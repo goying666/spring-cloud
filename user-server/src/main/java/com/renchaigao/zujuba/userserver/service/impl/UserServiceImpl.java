@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 
+import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.*;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -55,17 +57,17 @@ public class UserServiceImpl implements UserService {
     UserOpenInfoMapper userOpenInfoMapper;
 
     @Override
-    public ResponseEntity SignInUser(String phoneNumber, String verCode,String mode, String jsonObjectString) {
+    public ResponseEntity SignInUser(String phoneNumber, String verCode, String mode, String jsonObjectString) {
         SignInUserFunctions signInUserFunctions = new SignInUserFunctions(userMapper, mongoTemplate, userRankMapper, userOpenInfoMapper);
-        switch (mode){
+        switch (mode) {
             case "vercode"://请求获取验证码
                 return signInUserFunctions.SignInUserGetVerCode(phoneNumber);
             case "signin"://通过验证码注册
                 String verCodeFind;
-                try{
+                try {
                     verCodeFind = mongoTemplate.findById(phoneNumber, VerificationCodeInfo.class).getCode();
-                }catch (Exception e){
-                    return new ResponseEntity(RespCode.SIGNIN_WRONG,"Wrong verCode");
+                } catch (Exception e) {
+                    return new ResponseEntity(RespCode.SIGNIN_WRONG, "Wrong verCode");
                 }
                 if (!verCodeFind.equals(verCode)) {
                     return new ResponseEntity(RespCode.SIGNIN_WRONG, "Wrong verCode");
@@ -76,13 +78,13 @@ public class UserServiceImpl implements UserService {
                     return signInUserFunctions.SignInUserCreateUserInfo(phoneNumber, jsonObjectString);
                 }
         }
-        return new ResponseEntity(RespCode.WRONGIP,"Wrong mode");
+        return new ResponseEntity(RespCode.WRONGIP, "Wrong mode");
     }
 
     @Override
     public ResponseEntity LoginUser(
             String loginStyle, String phoneNumber, String userId, String jsonObjectString) {
-        LoginUserFunctions loginUserFunctions = new LoginUserFunctions(userMapper,userLoginMapper);
+        LoginUserFunctions loginUserFunctions = new LoginUserFunctions(userMapper, userLoginMapper);
 //        通过loginStyle判断登录方式；
         switch (loginStyle) {
             case "auto":
@@ -127,19 +129,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity UpdateUser(String updateStyle, String userId, String jsonObjectString) {
-//        String userToken = JSONObject.parseObject(jsonObjectString).getString("userToken");
-        UpdateUserFunctions updateUserFunctions = new UpdateUserFunctions(userMapper,userRankMapper,mongoTemplate);
-        switch (updateStyle) {
-            case "basicInfo":
-                return updateUserFunctions.UpdateUserBasicPartFunction(userId, jsonObjectString);
-            case "addressInfo":
-                return updateUserFunctions.UpdateUserAddressInfoFunction(userId, jsonObjectString);
-//            case "photoInfo":
-//                userMongoDB.setUserOpenInfo(userOpenInfoMapper.selectByPrimaryKey(userMongoDB.getUserOpenInfo().getId()));
-//                break;
+    public ResponseEntity UpdateUser(String updateStyle, String userId, JSONObject jsonObject) {
+        UpdateUserFunctions updateUserFunctions = new UpdateUserFunctions(userMapper, userRankMapper, mongoTemplate,userOpenInfoMapper);
+        try {
+            switch (updateStyle) {
+                case USER_UPDATE_INFO_CLASS_BASIC:
+                    return updateUserFunctions.UpdateUserBasicPartFunction(userId, jsonObject);
+                case USER_UPDATE_INFO_CLASS_ADDRESS:
+                    return updateUserFunctions.UpdateUserAddressInfoFunction(userId, jsonObject);
+                case USER_UPDATE_INFO_CLASS_PWD:
+                    break;
+                case USER_UPDATE_INFO_CLASS_IDCARD:
+                    break;
+            }
+            return new ResponseEntity(RespCode.CLUB_UPDATE_FAIL, null);
+        } catch (Exception e) {
+            return new ResponseEntity(RespCode.EXCEPTION, e);
+
         }
-        return new ResponseEntity(RespCode.WARN, "wrong part");
     }
+
 
 }

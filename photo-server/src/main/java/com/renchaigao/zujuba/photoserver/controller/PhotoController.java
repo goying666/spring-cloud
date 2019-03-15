@@ -69,6 +69,8 @@ public class PhotoController {
     }
 
 
+
+
 //    @GetMapping(value = "/show1image/{userid}/{placeid}/{filename}",produces = {MediaType.IMAGE_JPEG_VALUE,MediaType.IMAGE_PNG_VALUE})
 //    @ResponseBody
 //    public BufferedImage EasyShowImage1(@PathVariable("userid") String userid,

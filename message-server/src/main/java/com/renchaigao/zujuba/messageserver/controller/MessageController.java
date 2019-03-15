@@ -16,7 +16,7 @@ public class MessageController {
     @Autowired
     MessageServiceImpl messageServiceImpl;
 
-    @GetMapping(value = "/getteam")
+    @GetMapping(value = "/get")
     @ResponseBody
     public ResponseEntity GetMessageInfo(
             @RequestParam(value = "userId") String userId,
@@ -37,9 +37,9 @@ public class MessageController {
     @ResponseBody
     public ResponseEntity AddMessageInfo(
             @RequestParam(value = "userId") String userId,
-            @RequestParam(value = "messageClass") String messageClass,
+            @RequestParam(value = "token") String token,
             @RequestBody MessageContent messageContent) {
-        return messageServiceImpl.AddMessageInfo(userId, messageClass, messageContent);
+        return messageServiceImpl.AddMessageInfo( messageContent);
     }
 
 

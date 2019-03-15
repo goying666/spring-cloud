@@ -13,7 +13,7 @@ public interface TeamService {
 
     ResponseEntity FindOneTeam(String userId, String teamId, String jsonObjectString);
 
-    ResponseEntity JoinTeam(String userId, String teamId, String jsonObjectString);
+    ResponseEntity JoinTeam(String userId, String teamId);
 
     //    //    team相关信息的更新（基本设置、游戏配置、人员变动等）
     ResponseEntity UpdateTeam(String userId, String teamId, String parameter, String jsonObjectString);

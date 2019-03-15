@@ -9,7 +9,9 @@ import com.renchaigao.zujuba.dao.mapper.UserOpenInfoMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
 import com.renchaigao.zujuba.mongoDB.info.club.ClubInfo;
+import com.renchaigao.zujuba.mongoDB.info.club.ClubUserInfo;
 import com.renchaigao.zujuba.mongoDB.info.user.UserClubInfo;
+import com.renchaigao.zujuba.mongoDB.info.user.UserInfo;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -56,14 +58,23 @@ public class ClubServiceImpl implements ClubService {
 //        修改对应Flow内容；
         CreateNewClubInfoFunctions createNewClubInfoFunctions = new CreateNewClubInfoFunctions(userMapper, normalMongoTemplate,
                 messageMongoTemplate, kafkaTemplate);
-        //        检查参数完整性：id重复、名称重复；
-        createNewClubInfoFunctions.cheackClubInfo(clubInfo);
-        createNewClubInfoFunctions.placeLimitCheck(clubInfo);
-        createNewClubInfoFunctions.createClub(clubInfo);
+        try {
+
+            //        检查参数完整性：id重复、名称重复；
+            createNewClubInfoFunctions.cheackClubInfo(clubInfo);
+            if (!createNewClubInfoFunctions.placeLimitCheck(clubInfo)) {
+                return new ResponseEntity(RespCode.CLUB_HAD_BEEN_CREATE, clubInfo);
+            }
+            createNewClubInfoFunctions.createClub(clubInfo);
 //        大本营选择的场所限制————待开发
 //        创建club
-        normalMongoTemplate.save(clubInfo, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_CLUB_INFO);
-        return new ResponseEntity(RespCode.SUCCESS, clubInfo);
+            normalMongoTemplate.save(clubInfo, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_CLUB_INFO);
+            return new ResponseEntity(RespCode.CLUB_CREATE_SUCCESS, clubInfo);
+
+        } catch (Exception e) {
+            return new ResponseEntity(RespCode.CLUB_CREATE_FAIL, null);
+
+        }
     }
 
     @Override
@@ -93,6 +104,18 @@ public class ClubServiceImpl implements ClubService {
         }
 
         return new ResponseEntity(RespCode.CLUB_UPDATE_FAIL);
+    }
+
+    @Override
+    public ResponseEntity GetOneClub(String userId, String clubId) {
+//        鉴别用户身份，更具不同身份传递不同的Bean
+        UserInfo userInfo = normalMongoTemplate.findById(userId, UserInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_INFO);
+        ClubInfo clubInfo = normalMongoTemplate.findById(clubId, ClubInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_CLUB_INFO);
+//        ClubUserInfo
+        if (clubInfo == null) {
+            return new ResponseEntity(RespCode.MESSAGE_USER_GET_CLUB_ZERO, null);
+        }
+        return new ResponseEntity(RespCode.MESSAGE_USER_GET_CLUB_SUCCESS, clubInfo);
     }
 
 

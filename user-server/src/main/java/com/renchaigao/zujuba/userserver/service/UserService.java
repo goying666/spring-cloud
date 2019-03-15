@@ -1,6 +1,8 @@
 package com.renchaigao.zujuba.userserver.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
+import com.renchaigao.zujuba.mongoDB.info.user.UserInfo;
 
 public interface UserService {
 
@@ -11,5 +13,5 @@ public interface UserService {
 //    ResponseEntity QuitUser(String userId, String parameter, String teamId, String jsonObjectString);
 //    ResponseEntity FindBackUser(String userId, String parameter, String teamId, String jsonObjectString);
     ResponseEntity GetUser(String userId, String jsonObjectString);
-    ResponseEntity UpdateUser(String updateStyle, String userId, String jsonObjectString);
+    ResponseEntity UpdateUser(String updateStyle, String userId, JSONObject jsonObject);
 }

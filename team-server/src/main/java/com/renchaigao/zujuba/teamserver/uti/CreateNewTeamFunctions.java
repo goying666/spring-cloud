@@ -169,8 +169,8 @@ public class CreateNewTeamFunctions {
     public void UpdateMyTeamsInfo(TeamInfo teamInfo) {
 //        userTeam
         mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(teamInfo.getCreaterId())),
-                new Update().push("userTeams.allTeamsList", teamInfo.getId())
-                        .push("userTeams.doingTeamsList", teamInfo.getId()),
+                new Update().push("allTeamsList", teamInfo.getId())
+                        .push("doingTeamsList", teamInfo.getId()),
                 MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_TEAMS);
     }
 
@@ -208,14 +208,19 @@ public class CreateNewTeamFunctions {
      */
     public void CreateTeamMessageInfo(TeamInfo teamInfo) {
 //        创建team对应的message
-        TeamMessageInfo teamMessageInfo = new TeamMessageInfo();
-        teamMessageInfo.setId(teamInfo.getId());
-        teamMessageInfo.setUpTime(dateUse.GetStringDateNow());
-        teamMessageInfo.setCreateId(teamInfo.getCreaterId());
-        teamMessageInfo.setPlaceAdminId(teamInfo.getAddressInfo().getOwnerId());
-        messageMongoTemplate.save(teamMessageInfo,
-                MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_MESSAGE_INFO );
+//        TeamMessageInfo teamMessageInfo = new TeamMessageInfo();
+//        teamMessageInfo.setId(teamInfo.getId());
+//        teamMessageInfo.setUpTime(dateUse.GetStringDateNow());
+//        teamMessageInfo.setCreateId(teamInfo.getCreaterId());
+//        teamMessageInfo.setPlaceAdminId(teamInfo.getAddressInfo().getOwnerId());
+//        messageMongoTemplate.save(teamMessageInfo,
+//                MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_MESSAGE_INFO );
 //        系统发送一个通知给创建者 并且 创建者发送一个team的message
+//
+
+        /*
+         *         有关创建者的消息部分
+         */
         //        1、系统通知创建者 并 给创建者创建一个teamMessageInfo
         MessageContent sendSystemMessageContent = new MessageContent();//创建系统发送给创建者的消息content
         sendSystemMessageContent.setUserId(teamInfo.getCreaterId());
@@ -244,7 +249,12 @@ public class CreateNewTeamFunctions {
         userMessageContent.setTeamId(teamInfo.getId());
 
         kafkaTemplate.send(TEAM_SEND_MESSAGE, JSONObject.toJSONString(userMessageContent));
-//        系统发送一个通知给管理员 并且 管理员发送一个team的message
+
+
+        /*
+         *         有关场地管理员的消息部分
+         */
+        //        系统发送一个通知给场地管理员 并且 场地管理员发送一个team的message
         //        1、系统通知创建者 并 给创建者创建一个teamMessageInfo
         sendSystemMessageContent = new MessageContent();//创建系统发送给创建者的消息content
         sendSystemMessageContent.setUserId(teamInfo.getAddressInfo().getOwnerId());
@@ -252,14 +262,14 @@ public class CreateNewTeamFunctions {
         sendSystemMessageContent.setTitle("新组局消息");
         sendSystemMessageContent.setSenderId(MESSAGE_SENDER_SYSTEM);
         sendSystemMessageContent.setMessageClass(SYSTEM_SEND_MESSAGE);
-//        设置任务链接id ————————待开发//        sendSystemMessageContent.setGotoId();
+        //        设置任务链接id ————————待开发//        sendSystemMessageContent.setGotoId();
         nowTimeLong = dateUse.getNowTimeLong();
         sendSystemMessageContent.setSendTime(nowTimeLong);
         sendSystemMessageContent.setIdLong(nowTimeLong);
         sendSystemMessageContent.setSenderImageUrl(ZJB_LOGO_IMAGE);
         sendSystemMessageContent.setTeamId(teamInfo.getId());
         kafkaTemplate.send(SYSTEM_SEND_MESSAGE, JSONObject.toJSONString(sendSystemMessageContent));
-//        2、创建者在team群里发送一个消息content
+        //        2、场地管理员在team群里发送一个消息content
         userMessageContent = new MessageContent();
         userMessageContent.setIsMe(true);
         userMessageContent.setContent("Hi~我是此次组局的场地负责人，您有任何与场地相关的问题都可以咨询我，祝玩的愉快~");

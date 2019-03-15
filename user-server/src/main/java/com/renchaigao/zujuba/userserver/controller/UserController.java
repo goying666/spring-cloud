@@ -1,7 +1,11 @@
 package com.renchaigao.zujuba.userserver.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
+import com.renchaigao.zujuba.mongoDB.info.message.MessageContent;
+import com.renchaigao.zujuba.mongoDB.info.user.UserInfo;
 import com.renchaigao.zujuba.userserver.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,6 +17,8 @@ public class UserController {
 
     @Autowired
     UserServiceImpl userServiceImpl;
+    @Autowired
+    UserMapper userMapper;
 
     @PostMapping(value = "/{firstStr}/{secondStr}/{thirdStr}/{fourthStr}", consumes = "application/json")
     @ResponseBody
@@ -43,12 +49,21 @@ public class UserController {
                 return userServiceImpl.GetUser(
                         secondStr,//传递用户id：userId
                         jsonObjectString);//传递userInfo
-            case "update":
-                return userServiceImpl.UpdateUser(
-                        secondStr,//更新类型：updateStyle
-                        thirdStr,//用户id：userId
-                        jsonObjectString);
         }
         return new ResponseEntity(RespCode.WRONGIP, null);
     }
+
+
+    @PostMapping(value = "/update", consumes = "application/json")
+    @ResponseBody
+    public ResponseEntity UpdateUserInfo(
+            @RequestParam(value = "updateStyle") String updateStyle,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "token") String token,
+            @RequestBody JSONObject jsonObject) {
+        if (userMapper.selectByPrimaryKey(userId).getToken().equals(token)) {
+            return userServiceImpl.UpdateUser(updateStyle, userId, jsonObject);
+        } else return new ResponseEntity(RespCode.TOKENWRONG, null);
+    }
+
 }

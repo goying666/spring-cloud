@@ -9,7 +9,7 @@ public interface MessageService {
     ResponseEntity GetMessageFragmentBean(String userId);
 
     //    用户增加一条新消息
-    ResponseEntity AddMessageInfo(String userid, String messageClass, MessageContent messageContent);
+    ResponseEntity AddMessageInfo( MessageContent messageContent);
 
     //    用户获取新消息
     ResponseEntity GetMessageInfo(String userid, String ownerId, String messageClass, long lasttime);

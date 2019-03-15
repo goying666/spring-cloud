@@ -3,6 +3,7 @@ package com.renchaigao.zujuba.teamserver.controller;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
+import com.renchaigao.zujuba.mongoDB.info.message.MessageContent;
 import com.renchaigao.zujuba.teamserver.service.impl.TeamServiceImpl;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,6 @@ public class TeamController {
                 return teamServiceImpl.GetNearTeams(secondStr, thirdStr, jsonObjectString);
             case "getone":
                 return teamServiceImpl.FindOneTeam( secondStr, thirdStr, jsonObjectString);
-            case "join":
-                return teamServiceImpl.JoinTeam( secondStr, thirdStr, jsonObjectString);
 //            case "update":
 //                return teamServiceImpl.UpdateTeam(userId, secondStr, teamId, jsonObjectString);
 //            case "quit":
@@ -56,6 +55,18 @@ public class TeamController {
 //                return teamServiceImpl.DeleteMyTeams(userId, secondStr, teamId, jsonObjectString);
         }
         return new ResponseEntity(RespCode.WRONGIP,null);
+    }
+
+
+    @PostMapping(value = "/join")
+    @ResponseBody
+    public ResponseEntity AddMessageInfo(
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "token") String token,
+            @RequestParam(value = "teamId") String teamId) {
+        if(userMapper.selectByPrimaryKey(userId).getToken().equals(token)){
+            return teamServiceImpl.JoinTeam( userId,teamId);
+        }else return new ResponseEntity(RespCode.TOKENWRONG,null);
     }
 
 //    private Boolean UserAuthenticationFun(String userId,String userToken){

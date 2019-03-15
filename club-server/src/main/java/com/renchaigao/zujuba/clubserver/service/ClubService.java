@@ -7,4 +7,6 @@ public interface ClubService {
     //    用户创建一个club
     ResponseEntity CreateNewClub(String userId, String placeId, ClubInfo clubInfo);
     ResponseEntity GetUserAllClub(String userId, String tocken);
+    ResponseEntity GetOneClub(String userId, String clubId);
+
 }

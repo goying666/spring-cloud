@@ -6,7 +6,6 @@ import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
 import com.renchaigao.zujuba.mongoDB.info.club.ClubInfo;
-import com.renchaigao.zujuba.mongoDB.info.club.ClubMessageInfo;
 import com.renchaigao.zujuba.mongoDB.info.club.ClubUserInfo;
 import com.renchaigao.zujuba.mongoDB.info.message.MessageContent;
 import com.renchaigao.zujuba.mongoDB.info.store.StoreInfo;
@@ -18,8 +17,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import static com.renchaigao.zujuba.PropertiesConfig.ClubConstant.ROLE_CREATER;
-import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.*;
-import static com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_CLUB_MESSAGE_INFO;
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.CLUB_SEND_MESSAGE;
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.CONFIG_RENAME_CLUB_TIMES;
 import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.GENDER_BOY;
 import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.GENDER_GIRL;
 
@@ -49,7 +48,7 @@ public class CreateNewClubInfoFunctions {
      * 说明：大本营选择的场所限制————待开发
      */
     public Boolean placeLimitCheck(ClubInfo clubInfo) {
-        return true;
+        return normalMongoTemplate.findById(clubInfo.getId(), ClubInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_CLUB_INFO) == null;
     }
 
     /*

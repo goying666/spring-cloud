@@ -28,30 +28,34 @@ public class MessageConsumerController {
 //        messageConsumerServiceImpl.CreateNewTeam(teamInfo);
 //    }
 
+
     @KafkaListener(topics = SYSTEM_SEND_MESSAGE)
     public void SystemSendMessage(ConsumerRecord<?, String> record) {
-        MessageContent messageContent = JSONObject.parseObject(record.value(),MessageContent.class);
-        messageConsumerServiceImpl.SystemSendMessage(messageContent);
+        MessageContent messageContent = JSONObject.parseObject(record.value(), MessageContent.class);
+        messageServiceImpl.AddMessageInfo(messageContent);
     }
+
     @KafkaListener(topics = TEAM_SEND_MESSAGE)
     public void TEAM_SEND_MESSAGE(ConsumerRecord<?, String> record) {
-        MessageContent messageContent = JSONObject.parseObject(record.value(),MessageContent.class);
-        messageServiceImpl.AddMessageInfo(messageContent.getUserId(), messageContent.getMessageClass(), messageContent);
+        MessageContent messageContent = JSONObject.parseObject(record.value(), MessageContent.class);
+        messageServiceImpl.AddMessageInfo(messageContent);
     }
-    @KafkaListener(topics = USER_SEND_MESSAGE)
-    public void UserSendMessage(ConsumerRecord<?, String> record) {
-        MessageContent messageContent = JSONObject.parseObject(record.value(),MessageContent.class);
-        messageConsumerServiceImpl.UserSendMessage(messageContent);
-    }
+
     @KafkaListener(topics = FRIEND_SEND_MESSAGE)
     public void FRIEND_SEND_MESSAGE(ConsumerRecord<?, String> record) {
-        MessageContent messageContent = JSONObject.parseObject(record.value(),MessageContent.class);
-        messageConsumerServiceImpl.FriendSendMessage(messageContent);
+        MessageContent messageContent = JSONObject.parseObject(record.value(), MessageContent.class);
+        messageServiceImpl.AddMessageInfo(messageContent);
     }
+
     @KafkaListener(topics = CLUB_SEND_MESSAGE)
     public void CLUB_SEND_MESSAGE(ConsumerRecord<?, String> record) {
-        MessageContent messageContent = JSONObject.parseObject(record.value(),MessageContent.class);
-        messageConsumerServiceImpl.ClubSendMessage(messageContent);
+        MessageContent messageContent = JSONObject.parseObject(record.value(), MessageContent.class);
+        messageServiceImpl.AddMessageInfo(messageContent);
     }
+//    @KafkaListener(topics = USER_SEND_MESSAGE)
+//    public void UserSendMessage(ConsumerRecord<?, String> record) {
+//        MessageContent messageContent = JSONObject.parseObject(record.value(),MessageContent.class);
+//        messageServiceImpl.AddMessageInfo(messageContent.getUserId(), messageContent.getMessageClass(), messageContent);
+//    }
 
 }

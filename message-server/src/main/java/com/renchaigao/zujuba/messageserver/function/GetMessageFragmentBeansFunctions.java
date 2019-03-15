@@ -3,19 +3,16 @@ package com.renchaigao.zujuba.messageserver.function;
 import com.renchaigao.zujuba.PageBean.CardMessageFragmentTipBean;
 import com.renchaigao.zujuba.PageBean.MessageFragmentCardBean;
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
-import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
 import com.renchaigao.zujuba.mongoDB.info.message.*;
 import com.renchaigao.zujuba.mongoDB.info.user.UserMessagesInfo;
-import com.sun.org.apache.bcel.internal.generic.BREAKPOINT;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.kafka.core.KafkaTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
 
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.*;
 
@@ -51,41 +48,76 @@ public class GetMessageFragmentBeansFunctions {
             ArrayList<String> teamIdList = new ArrayList<>();
             ArrayList<String> clubIdList = new ArrayList<>();
             ArrayList<String> friendIdList = new ArrayList<>();
+
+            ArrayList<String> teamMessageNoReadList = userMessagesInfo.getUserTeamMessageIdList();
+            ArrayList<String> systemMessageNoReadList = userMessagesInfo.getUserSystemMessageIdList();
+            ArrayList<String> clubMessageNoReadList = userMessagesInfo.getUserClubMessageIdList();
+            ArrayList<String> friendMessageNoReadList = userMessagesInfo.getUserFriendsMessageIdList();
+
             Integer allNoRead = 0;
-            for (String teamId : userMessagesInfo.getUserClubMessageIdList()) {
-                TeamMessages teamMessages = messageMongoTemplate.findAndModify(
-                        Query.query(Criteria.where("_id").is(teamId))
-                        , new Update().pull("readList", userId), TeamMessages.class,
-                        MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_MESSAGES);
-                teamMessagesArrayList.add(teamMessages);
-                MessageTipBeanFunction(teamPartList, teamIdList, teamMessages, TEAM_SEND_MESSAGE);
-                allNoRead++;
+            if(teamMessageNoReadList.size()>0){
+                for (String teamId : teamMessageNoReadList) {
+                    normalMongoTemplate.updateFirst(
+                            Query.query(Criteria.where("_id").is(userId))
+                            , new Update().pull("userTeamMessageIdList", teamId), UserMessagesInfo.class,
+                            MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO);
+                    TeamMessages teamMessages = messageMongoTemplate.findAndModify(
+                            Query.query(Criteria.where("_id").is(teamId))
+                            , new Update().pull("readList", userId), TeamMessages.class,
+                            MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_MESSAGES);
+                    teamMessagesArrayList.add(teamMessages);
+                    MessageTipBeanFunction(teamPartList, teamIdList, teamMessages, TEAM_SEND_MESSAGE);
+                    allNoRead++;
+                }
             }
-            for (String systemId : userMessagesInfo.getUserSystemMessageIdList()) {
-                systemMessagesArrayList.add(messageMongoTemplate.findAndModify(
-                        Query.query(Criteria.where("_id").is(systemId))
-                        , new Update().pull("readList", userId), SystemMessages.class,
-                        MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_SYSTEM_MESSAGES));
-                allNoRead++;
+
+            if(systemMessageNoReadList.size()>0){
+                for (String systemId : systemMessageNoReadList) {
+                    normalMongoTemplate.updateFirst(
+                            Query.query(Criteria.where("_id").is(userId))
+                            , new Update().pull("userSystemMessageIdList", systemId), UserMessagesInfo.class,
+                            MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO);
+                    systemMessagesArrayList.add(messageMongoTemplate.findAndModify(
+                            Query.query(Criteria.where("_id").is(systemId))
+                            , new Update().pull("readList", userId), SystemMessages.class,
+                            MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_SYSTEM_MESSAGES));
+                    allNoRead++;
+                }
             }
-            for (String teamId : userMessagesInfo.getUserClubMessageIdList()) {
-                ClubMessages clubMessages = messageMongoTemplate.findAndModify(
-                        Query.query(Criteria.where("_id").is(teamId))
-                        , new Update().pull("readList", userId), ClubMessages.class,
-                        MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_CLUB_MESSAGES);
-                clubMessagesArrayList.add(clubMessages);
-                MessageTipBeanFunction(clubPartList, clubIdList, clubMessages, CLUB_SEND_MESSAGE);
-                allNoRead++;
+
+            if(clubMessageNoReadList.size()>0){
+                for (String clubId : clubMessageNoReadList) {
+                    normalMongoTemplate.updateFirst(
+                            Query.query(Criteria.where("_id").is(userId))
+                            , new Update().pull("userClubMessageIdList", clubId), UserMessagesInfo.class,
+                            MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO);
+                    ClubMessages clubMessages = messageMongoTemplate.findAndModify(
+                            Query.query(Criteria.where("_id").is(clubId))
+                            , new Update().pull("readList", userId), ClubMessages.class,
+                            MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_CLUB_MESSAGES);
+                    clubMessagesArrayList.add(clubMessages);
+                    MessageTipBeanFunction(clubPartList, clubIdList, clubMessages, CLUB_SEND_MESSAGE);
+                    allNoRead++;
+                }
             }
-            for (String friendId : userMessagesInfo.getUserClubMessageIdList()) {
-                FriendMessages friendMessages = messageMongoTemplate.findAndModify(
-                        Query.query(Criteria.where("_id").is(friendId))
-                        , new Update().pull("readList", userId), FriendMessages.class,
-                        MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_FRIEND_MESSAGES);
-                friendMessagesArrayList.add(friendMessages);
-                MessageTipBeanFunction(friendPartList, friendIdList, friendMessages, FRIEND_SEND_MESSAGE);
-                allNoRead++;
+
+            if(friendMessageNoReadList.size()>0){
+                for (String friendId : friendMessageNoReadList) {
+                    normalMongoTemplate.updateFirst(
+                            Query.query(Criteria.where("_id").is(userId))
+                            , new Update().pull("userFriendsMessageIdList", friendId), UserMessagesInfo.class,
+                            MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_MESSAGE_INFO);
+                    FriendMessages friendMessages = messageMongoTemplate.findAndModify(
+                            Query.query(Criteria.where("_id").is(friendId))
+                            , new Update().pull("readList", userId), FriendMessages.class,
+                            MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_FRIEND_MESSAGES);
+                    friendMessagesArrayList.add(friendMessages);
+                    MessageTipBeanFunction(friendPartList, friendIdList, friendMessages, FRIEND_SEND_MESSAGE);
+                    allNoRead++;
+                }
             }
+
+
             if (allNoRead == 0)
                 return new ResponseEntity(RespCode.MESSAGE_USER_GET_ALL_ZERO, null);
             messageFragmentCardBean.setClubMessagesArrayList(clubMessagesArrayList);
