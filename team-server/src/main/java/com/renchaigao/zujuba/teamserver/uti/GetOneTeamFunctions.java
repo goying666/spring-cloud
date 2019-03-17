@@ -51,6 +51,8 @@ public class GetOneTeamFunctions {
      */
     public TeamActivityBean AssembleOtherInfo(String userId, TeamInfo teamInfo) {
         TeamActivityBean teamActivityBean = new TeamActivityBean();
+        TeamPlayerInfo teamPlayerInfo = mongoTemplate.findById(teamInfo.getId(),
+                TeamPlayerInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_PLAYER_INFO);
         //teamID
         teamActivityBean.setTeamId(teamInfo.getId());
         //teamName
@@ -59,14 +61,18 @@ public class GetOneTeamFunctions {
         if (teamInfo.getCreaterId().equals(userId)) {
             teamActivityBean.setUserClass("房主");
         } else {
-            TeamPlayerInfo teamPlayerInfo = mongoTemplate.findById(teamInfo.getId(), TeamPlayerInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_PLAYER_INFO);
-            for (PlayerInfo o : teamPlayerInfo.getPlayerArrayList()) {
-                if (o.getId().equals(userId)) {
-                    teamActivityBean.setUserClass("玩家");
-                    break;
-                } else {
-                    teamActivityBean.setUserClass("游客");
+            if (teamPlayerInfo != null) {
+                for (PlayerInfo o : teamPlayerInfo.getPlayerArrayList()) {
+                    if (o.getId().equals(userId)) {
+                        teamActivityBean.setUserClass("玩家");
+                        break;
+                    } else {
+                        teamActivityBean.setUserClass("游客");
+                    }
                 }
+            } else {
+
+                teamActivityBean.setUserClass("游客");
             }
         }
         //队伍状态
@@ -150,8 +156,6 @@ public class GetOneTeamFunctions {
 //        已入局的玩家人数
         teamActivityBean.setAllPlayerNum(teamInfo.getPlayerNow().toString());
 //        已入局的男玩家人数
-        TeamPlayerInfo teamPlayerInfo = mongoTemplate.findById(teamInfo.getId(),
-                TeamPlayerInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_PLAYER_INFO);
         teamActivityBean.setBoyPlayerNum(teamPlayerInfo.getBoySum().toString());
 //        已入局的女玩家人数
         teamActivityBean.setGirlPlayerNum(teamPlayerInfo.getGirlSum().toString());
@@ -215,7 +219,16 @@ public class GetOneTeamFunctions {
                 cardPlayerInfoBean.setUserNote(p.getUserOpenInfo().getOpenNote());
             cardPlayerInfoBeans.add(cardPlayerInfoBean);
         }
+//      主要游戏部分设置
+        if (teamGameInfo.isSelect_LRS())
+            teamActivityBean.setMainGame("LRS");
+        else if(teamGameInfo.isSelect_THQBY())
+            teamActivityBean.setMainGame("THQBY");
+        else if(teamGameInfo.isSelect_MXTSJ())
+            teamActivityBean.setMainGame("MXTSJ");
         teamActivityBean.setPlayerList(cardPlayerInfoBeans);
         return teamActivityBean;
     }
+
 }
+

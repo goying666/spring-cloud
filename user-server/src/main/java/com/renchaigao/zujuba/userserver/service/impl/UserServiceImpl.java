@@ -7,7 +7,9 @@ import com.renchaigao.zujuba.dao.mapper.*;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
 import com.renchaigao.zujuba.mongoDB.info.VerificationCodeInfo;
+import com.renchaigao.zujuba.mongoDB.info.user.UserGames;
 import com.renchaigao.zujuba.mongoDB.info.user.UserInfo;
+import com.renchaigao.zujuba.mongoDB.info.user.UserTeams;
 import com.renchaigao.zujuba.userserver.service.UserService;
 import com.renchaigao.zujuba.userserver.uti.LoginUserFunctions;
 import com.renchaigao.zujuba.userserver.uti.SignInUserFunctions;
@@ -130,7 +132,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity UpdateUser(String updateStyle, String userId, JSONObject jsonObject) {
-        UpdateUserFunctions updateUserFunctions = new UpdateUserFunctions(userMapper, userRankMapper, mongoTemplate,userOpenInfoMapper);
+        UpdateUserFunctions updateUserFunctions = new UpdateUserFunctions(userMapper, userRankMapper, mongoTemplate, userOpenInfoMapper);
         try {
             switch (updateStyle) {
                 case USER_UPDATE_INFO_CLASS_BASIC:
@@ -143,6 +145,25 @@ public class UserServiceImpl implements UserService {
                     break;
             }
             return new ResponseEntity(RespCode.CLUB_UPDATE_FAIL, null);
+        } catch (Exception e) {
+            return new ResponseEntity(RespCode.EXCEPTION, e);
+
+        }
+    }
+
+    @Override
+    public ResponseEntity GetUserMineInfo(String userId) {
+        try {
+            UserTeams userTeams = mongoTemplate.findById(userId, UserTeams.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_TEAMS);
+            Integer allTeams = 0;
+            if (userTeams != null)
+                allTeams = userTeams.getAllTeamsList() == null ? 0 : userTeams.getAllTeamsList().size();
+            UserGames userGames = mongoTemplate.findById(userId,UserGames.class,MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_GAMES);
+            Integer allGames = 0;
+            if (userGames != null)
+                allGames = userTeams.getAllTeamsList() == null ? 0 : userTeams.getAllTeamsList().size();
+
+            return new ResponseEntity(RespCode.USER_MINE_INFO_SUCCESS, null);
         } catch (Exception e) {
             return new ResponseEntity(RespCode.EXCEPTION, e);
 

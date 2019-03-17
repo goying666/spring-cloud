@@ -87,7 +87,7 @@ public class UpdateUserFunctions {
             UserInfo userInfo = AssembleAllInfo(userId, userOld);
             userInfo.setUpTime(dateUse.GetStringDateNow());
             mongoTemplate.save(userInfo, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_INFO);
-q            return new ResponseEntity(RespCode.USER_UPDATE_INFO_SUCCESS, userInfo);
+            return new ResponseEntity(RespCode.USER_UPDATE_INFO_SUCCESS, userInfo);
         }return new ResponseEntity(RespCode.USER_UPDATE_INFO_FAIL,null);
     }
 

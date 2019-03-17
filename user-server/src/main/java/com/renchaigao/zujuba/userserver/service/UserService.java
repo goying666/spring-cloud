@@ -14,4 +14,5 @@ public interface UserService {
 //    ResponseEntity FindBackUser(String userId, String parameter, String teamId, String jsonObjectString);
     ResponseEntity GetUser(String userId, String jsonObjectString);
     ResponseEntity UpdateUser(String updateStyle, String userId, JSONObject jsonObject);
+    ResponseEntity GetUserMineInfo(String userId);
 }

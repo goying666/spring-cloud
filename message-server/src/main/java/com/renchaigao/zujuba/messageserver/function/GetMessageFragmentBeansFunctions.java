@@ -55,7 +55,7 @@ public class GetMessageFragmentBeansFunctions {
             ArrayList<String> friendMessageNoReadList = userMessagesInfo.getUserFriendsMessageIdList();
 
             Integer allNoRead = 0;
-            if(teamMessageNoReadList.size()>0){
+            if (teamMessageNoReadList.size() > 0) {
                 for (String teamId : teamMessageNoReadList) {
                     normalMongoTemplate.updateFirst(
                             Query.query(Criteria.where("_id").is(userId))
@@ -71,7 +71,7 @@ public class GetMessageFragmentBeansFunctions {
                 }
             }
 
-            if(systemMessageNoReadList.size()>0){
+            if (systemMessageNoReadList.size() > 0) {
                 for (String systemId : systemMessageNoReadList) {
                     normalMongoTemplate.updateFirst(
                             Query.query(Criteria.where("_id").is(userId))
@@ -85,7 +85,7 @@ public class GetMessageFragmentBeansFunctions {
                 }
             }
 
-            if(clubMessageNoReadList.size()>0){
+            if (clubMessageNoReadList.size() > 0) {
                 for (String clubId : clubMessageNoReadList) {
                     normalMongoTemplate.updateFirst(
                             Query.query(Criteria.where("_id").is(userId))
@@ -101,7 +101,7 @@ public class GetMessageFragmentBeansFunctions {
                 }
             }
 
-            if(friendMessageNoReadList.size()>0){
+            if (friendMessageNoReadList.size() > 0) {
                 for (String friendId : friendMessageNoReadList) {
                     normalMongoTemplate.updateFirst(
                             Query.query(Criteria.where("_id").is(userId))
@@ -129,7 +129,8 @@ public class GetMessageFragmentBeansFunctions {
                 return (int) (o2.getSendTime() - o1.getSendTime());//从大到小
             });
 //        将系统数据归为最后一条未显示Tip；
-            allBeanList.add(SystemMessagePartFunction(systemMessagesArrayList.get(0), systemMessagesArrayList.size()));
+            if (systemMessagesArrayList.size() > 0)
+                allBeanList.add(SystemMessagePartFunction(systemMessagesArrayList.get(0), systemMessagesArrayList.size()));
 //        将Team消息数据归为多条以teamId为划分的TipBean；
             allBeanList.addAll(teamPartList);
 //        将Club消息数据归为多条以clubId为划分的TipBean；

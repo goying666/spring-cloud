@@ -23,7 +23,7 @@ eureka:
         lease-renewal-interval-in-seconds: 20
         instance-id: ${spring.cloud.client.ip-address}:${server.port}
         prefer-ip-address: true
-#        ip-address: ${aliyun.server}
+        ip-address: ${aliyun.server}
 aliyun:
     server: 47.106.149.105
 

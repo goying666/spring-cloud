@@ -74,6 +74,7 @@ public class JoinTeamFunctions {
         } else {
             update.inc("girlSum", 1);
         }
+        update.inc("playerNow",1);
         update.inc("watingSum", 1).push("playerArrayList", playerInfo);
         normalMongoTemplate.updateFirst(Query.query(Criteria.where("teamId").is(teamId)), update,
                 TeamPlayerInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_PLAYER_INFO);
