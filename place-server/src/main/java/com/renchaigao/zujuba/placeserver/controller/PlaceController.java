@@ -1,9 +1,11 @@
 package com.renchaigao.zujuba.placeserver.controller;
 
+import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
 import com.renchaigao.zujuba.placeserver.service.impl.PlaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -86,6 +88,30 @@ public class PlaceController {
                 break;
         }
         return new ResponseEntity(RespCode.WRONGIP, null);
+    }
+
+    @Autowired
+    UserMapper userMapper;
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
+    @Autowired
+    StoreServiceImpl storeServiceImpl;
+
+    @GetMapping(value = "/getone")
+    @ResponseBody
+    public ResponseEntity GetOneStoreInfo(
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "storeId") String storeId,
+            @RequestParam(value = "token") String token,
+            @RequestParam(value = "lastTime") long lastTime) {
+        String news = redisTemplate.opsForValue().get("getMessageInfo" + storeId);
+        if (!userMapper.selectByPrimaryKey(userId).getToken().equals(token))
+            return new ResponseEntity(RespCode.TOKENWRONG, null);
+        else if (news != null && news.equals(lastTime))
+            return new ResponseEntity(RespCode.WARN, null);
+        else
+            return storeServiceImpl.GetOneStoreInfo(userId, storeId);
     }
 
 

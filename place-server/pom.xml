@@ -49,7 +49,7 @@
         <dependency>
             <groupId>com.renchaigao.zujuba</groupId>
             <artifactId>data20</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </dependency>
 
         <!--kafka-->

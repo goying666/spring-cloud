@@ -1,4 +1,4 @@
-package com.renchaigao.zujuba.taskflowserver;
+package com.renchaigao.zujuba.storeserver;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;

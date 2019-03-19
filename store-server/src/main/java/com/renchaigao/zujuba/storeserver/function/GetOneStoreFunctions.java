@@ -1,8 +1,9 @@
-package com.renchaigao.zujuba.placeserver.function;
+package com.renchaigao.zujuba.storeserver.function;
 
 import com.alibaba.fastjson.JSONObject;
 import com.renchaigao.zujuba.PageBean.StoreActivityBean;
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
+import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
 import com.renchaigao.zujuba.mongoDB.info.store.StoreInfo;
@@ -22,7 +23,7 @@ public class GetOneStoreFunctions {
     /*
      * 说明：获取以用户(普通用户)查看的店铺信息（全部）
      */
-    public ResponseEntity UserGetStoreInfo(String placeId, Boolean isOwner) {
+    public ResponseEntity UserGetStoreInfo( String placeId, Boolean isOwner) {
         StoreActivityBean storeActivityBean = new StoreActivityBean();
         try {
             if (isOwner) {

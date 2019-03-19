@@ -1,4 +1,4 @@
-package com.renchaigao.zujuba.taskflowserver.config;
+package com.renchaigao.zujuba.storeserver.config;
 
 import com.github.pagehelper.PageInterceptor;
 import org.apache.ibatis.plugin.Interceptor;

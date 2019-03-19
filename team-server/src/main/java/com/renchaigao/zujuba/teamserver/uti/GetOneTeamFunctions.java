@@ -51,6 +51,20 @@ public class GetOneTeamFunctions {
      */
     public TeamActivityBean AssembleOtherInfo(String userId, TeamInfo teamInfo) {
         TeamActivityBean teamActivityBean = new TeamActivityBean();
+        AddressInfo createAddress = teamInfo.getAddressInfo();
+        switch (createAddress.getAddressClass()){
+            case ADDRESS_CLASS_STORE:
+            teamActivityBean.setPlaceClass(ADDRESS_CLASS_STORE);
+                break;
+            case ADDRESS_CLASS_OPEN:
+            teamActivityBean.setPlaceClass(ADDRESS_CLASS_OPEN);
+                break;
+            case ADDRESS_CLASS_USER:
+            teamActivityBean.setPlaceClass(ADDRESS_CLASS_USER);
+                break;
+        }
+        teamActivityBean.setPlaceId(createAddress.getId());
+        teamActivityBean.setPlaceName(teamInfo.getPlaceName());
         TeamPlayerInfo teamPlayerInfo = mongoTemplate.findById(teamInfo.getId(),
                 TeamPlayerInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_PLAYER_INFO);
         //teamID
@@ -227,6 +241,8 @@ public class GetOneTeamFunctions {
         else if(teamGameInfo.isSelect_MXTSJ())
             teamActivityBean.setMainGame("MXTSJ");
         teamActivityBean.setPlayerList(cardPlayerInfoBeans);
+//        notes part
+        teamActivityBean.setCardTeamNotesBeans(teamInfo.getCardTeamNotesBeans());
         return teamActivityBean;
     }
 

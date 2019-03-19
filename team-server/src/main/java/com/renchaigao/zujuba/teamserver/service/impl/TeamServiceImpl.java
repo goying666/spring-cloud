@@ -2,6 +2,7 @@ package com.renchaigao.zujuba.teamserver.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.renchaigao.zujuba.PageBean.TeamActivityBean;
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
 import com.renchaigao.zujuba.dao.UserOpenInfo;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
@@ -65,7 +66,6 @@ public class TeamServiceImpl implements TeamService {
         TeamInfo teamInfo = JSONObject.parseObject(jsonObjectString, TeamInfo.class);
         teamInfo.setAddressInfo(normalMongoTemplate.findById(teamInfo.getAddressInfo().getId(),
                 AddressInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_ADDRESS_INFO));
-
 //        检查创建信息完整性 和 正确性（查重、冲突逻辑等）；
         if (!createNewTeamFunctions.CheckCreateInfo(JSONObject.toJSONString(teamInfo)))
             return null;

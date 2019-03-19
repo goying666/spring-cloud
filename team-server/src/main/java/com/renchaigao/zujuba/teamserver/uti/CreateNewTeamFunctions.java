@@ -1,8 +1,11 @@
 package com.renchaigao.zujuba.teamserver.uti;
 
 import com.alibaba.fastjson.JSONObject;
+import com.renchaigao.zujuba.PageBean.CardTeamNotesBean;
+import com.renchaigao.zujuba.PageBean.TeamActivityBean;
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
 import com.renchaigao.zujuba.dao.Address;
+import com.renchaigao.zujuba.dao.User;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.dao.mapper.UserOpenInfoMapper;
 import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
@@ -10,11 +13,15 @@ import com.renchaigao.zujuba.mongoDB.info.message.MessageContent;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamInfo;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamMessageInfo;
 import normal.dateUse;
+import org.apache.commons.lang.time.DateUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.kafka.core.KafkaTemplate;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.*;
 import static com.renchaigao.zujuba.PropertiesConfig.GameConstant.*;
@@ -83,7 +90,7 @@ public class CreateNewTeamFunctions {
     /*
      * 说明：地址信息
      */
-    public void CreateTeamInfoAddress(TeamInfo teamInfo) {
+    public void CreateTeamInfoAddress(TeamInfo teamInfo ) {
         Address createAddress = mongoTemplate.findById(teamInfo.getAddressInfo().getId(),
                 AddressInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_ADDRESS_INFO);
         switch (createAddress.getAddressClass()) {
@@ -91,7 +98,6 @@ public class CreateNewTeamFunctions {
 //                通知place-server有新组局创建；
                 kafkaTemplate.send(CREATE_NEW_TEAM, JSONObject.toJSONString(teamInfo));
 //                更新场地组局信息（增加）
-
                 break;
             case ADDRESS_CLASS_OPEN:
 //                自检内容：1、人数超标是否？
@@ -207,6 +213,8 @@ public class CreateNewTeamFunctions {
      * 说明：聊天信息部分
      */
     public void CreateTeamMessageInfo(TeamInfo teamInfo) {
+        User creater = userMapper.selectByPrimaryKey(teamInfo.getCreaterId());
+
 //        创建team对应的message
 //        TeamMessageInfo teamMessageInfo = new TeamMessageInfo();
 //        teamMessageInfo.setId(teamInfo.getId());
@@ -245,7 +253,7 @@ public class CreateNewTeamFunctions {
         userMessageContent.setMessageClass(TEAM_SEND_MESSAGE);
         userMessageContent.setSendTime(nowTimeLong);
         userMessageContent.setIdLong(nowTimeLong);
-        userMessageContent.setSenderImageUrl(userMapper.selectByPrimaryKey(teamInfo.getCreaterId()).getPicPath());
+        userMessageContent.setSenderImageUrl(creater.getPicPath());
         userMessageContent.setTeamId(teamInfo.getId());
 
         kafkaTemplate.send(TEAM_SEND_MESSAGE, JSONObject.toJSONString(userMessageContent));
@@ -281,6 +289,13 @@ public class CreateNewTeamFunctions {
         userMessageContent.setSenderImageUrl(userMapper.selectByPrimaryKey(teamInfo.getAddressInfo().getOwnerId()).getPicPath());
         userMessageContent.setTeamId(teamInfo.getId());
         kafkaTemplate.send(TEAM_SEND_MESSAGE, JSONObject.toJSONString(userMessageContent));
+
+        CardTeamNotesBean cardTeamNotesBean = new CardTeamNotesBean();
+        SimpleDateFormat formatter = new SimpleDateFormat("MM/dd HH:mm");
+        formatter.format(new Date());
+        cardTeamNotesBean.setTime(dateUse.GetStringDateNow() + ":");
+        cardTeamNotesBean.setContent("玩家 " + creater.getNickName() + "创建了当前组局。");
+        teamInfo.getCardTeamNotesBeans().add(cardTeamNotesBean);
     }
 
 }
