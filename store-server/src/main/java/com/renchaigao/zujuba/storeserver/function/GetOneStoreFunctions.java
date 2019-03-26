@@ -6,16 +6,22 @@ import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
+import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
 import com.renchaigao.zujuba.mongoDB.info.store.StoreInfo;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import store.DistanceFunc;
 
 import java.util.ArrayList;
+
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_CHECK;
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_DAYOFF;
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_DO_BUSINESS;
 
 public class GetOneStoreFunctions {
 
     private MongoTemplate mongoTemplate;
 
-    public GetOneStoreFunctions( MongoTemplate mongoTemplate) {
+    public GetOneStoreFunctions(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
 
@@ -23,7 +29,7 @@ public class GetOneStoreFunctions {
     /*
      * 说明：获取以用户(普通用户)查看的店铺信息（全部）
      */
-    public ResponseEntity UserGetStoreInfo( String placeId, Boolean isOwner) {
+    public ResponseEntity UserGetStoreInfo(String userId, String placeId, Boolean isOwner) {
         StoreActivityBean storeActivityBean = new StoreActivityBean();
         try {
             if (isOwner) {
@@ -39,25 +45,25 @@ public class GetOneStoreFunctions {
             storeActivityBean.setStoreName(storeInfo.getName());
 //        2组装店铺状态
             switch (storeInfo.getState()) {
-                case "C":
-                    storeActivityBean.setState("新创建");
-                    break;
-                case "S":
+//                case "C":
+//                    storeActivityBean.setState("新创建");
+//                    break;
+                case STORE_STATE_CHECK:
                     storeActivityBean.setState("审核");
                     break;
-                case "Y":
+                case STORE_STATE_DO_BUSINESS:
                     storeActivityBean.setState("营业");
                     break;
-                case "X":
+                case STORE_STATE_DAYOFF:
                     storeActivityBean.setState("打样");
                     break;
             }
 //        3组装店铺评分
             if (storeInfo.getStoreEvaluationInfo().getStoreScore() == 0) {
-                storeActivityBean.setCommentScore("0.0分");
+                storeActivityBean.setCommentScore("0.0");
 
             } else {
-                storeActivityBean.setCommentScore(storeInfo.getStoreEvaluationInfo().getStoreScore().toString() + "分");
+                storeActivityBean.setCommentScore(storeInfo.getStoreEvaluationInfo().getStoreScore().toString() + "");
             }
 //        4组装店铺多少人玩过
 //        jsonObject.put("allpeoplenum", storeInfo.getStoreTeamInfo().getAllUsersNum().toString() + "人玩过");
@@ -70,15 +76,17 @@ public class GetOneStoreFunctions {
 //        7组装店铺人数
 //        jsonObject.put("todaypeople", storeInfo.getStoreTeamInfo().getTodayPeople() + "/" + storeInfo.getMaxPeopleSum());
 //        8组装店铺距离
-            if (storeInfo.getAddressInfo().getDistance() > 1000) {
-//            jsonObject.put("distance",
-//                    Integer.toString(storeInfo.getAddressInfo().getDistance() / 1000) + "k" +
-//                            Integer.toString(storeInfo.getAddressInfo().getDistance() % 1000) + "m");
-                storeActivityBean.setDistance(Integer.toString(storeInfo.getAddressInfo().getDistance() / 1000) + "k" +
-                        Integer.toString(storeInfo.getAddressInfo().getDistance() % 1000) + "m");
+            AddressInfo userAddress = mongoTemplate.findById(userId, AddressInfo.class);
+            Double userX = userAddress != null ? userAddress.getLatitude() : 0, userY = userAddress != null ? userAddress.getLongitude() : 0;
+            Integer distance = DistanceFunc.getDistance(userX
+                    , userY
+                    , storeInfo.getAddressInfo().getLatitude()
+                    , storeInfo.getAddressInfo().getLongitude());
+            if (distance > 1000) {
+                storeActivityBean.setDistance(Integer.toString(distance / 1000) + "k" +
+                        Integer.toString(distance % 1000) + "m");
             } else {
-//            jsonObject.put("distance", storeInfo.getAddressInfo().getDistance().toString() + "m");
-                storeActivityBean.setDistance(storeInfo.getAddressInfo().getDistance().toString() + "m");
+                storeActivityBean.setDistance(distance.toString() + "m");
             }
 //        9组装店铺时段
 //            DayBusinessInfo dayBusinessInfo =
@@ -126,10 +134,11 @@ public class GetOneStoreFunctions {
 //        图片信息
             ArrayList<String> pathList = new ArrayList<>();
             for (int i = 1; i < 5; i++) {
-                pathList.add(storeInfo.getOwnerId() + "/" + storeInfo.getId() + "/" + i + ".jpg");
+                pathList.add(storeInfo.getOwnerId() + "/" + storeInfo.getId() + "/photo" + i + ".jpg");
             }
             storeActivityBean.setImagePaths(pathList);
 //        评论信息
+            storeActivityBean.setCommentTimes("0");
 //        组局信息
 //        套餐信息
             return new ResponseEntity(RespCode.STORE_INFO_GET_SUCCESS, storeActivityBean);

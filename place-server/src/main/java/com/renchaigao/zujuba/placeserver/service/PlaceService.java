@@ -17,10 +17,6 @@ public interface PlaceService {
 
     ResponseEntity GetNearPlace(String parameter, String userId, String jsonObjectString);
 
-    ResponseEntity GetUserPlaceList(String userId, String userToken);
-
-    ResponseEntity GetUserOnePlaceInfo(String userId, String userToken);
-
 
 //    ResponseEntity AddOpen(String parameter, String userId, String placeId, String jsonObjectString, MultipartFile[] photos);
 //

@@ -5,21 +5,24 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface StoreService {
 
-    ResponseEntity JoinPlace(String userId, String placeId, String jsonObjectString, MultipartFile[] photos);
+    ResponseEntity AddStore(String userId, String placeId, String jsonObjectString, MultipartFile[] photos);
 
 //    ResponseEntity UpdateStore(String parameter, String userId, String placeId, String jsonObjectString);
 //
 //    ResponseEntity DeleteStore(String parameter, String userId, String placeId, String jsonObjectString);
 //
-    ResponseEntity GetOneStoreInfo(String userId, String placeId);
+    ResponseEntity GetOneStoreInfo(String userId, String storeId);
+    ResponseEntity GetOneStoreTeamInfo(String userId, String storeId);
+    ResponseEntity GetOneStoreClubInfo(String userId, String storeId);
+    ResponseEntity GetOneStoreCommentInfo(String userId, String storeId);
+    ResponseEntity GetOneStoreGameInfo(String userId, String storeId);
+
+    ResponseEntity ManagerGetOneStoreInfo(String userId, String storeId);
 //
 //    ResponseEntity GetMyStore(String parameter, String userId, String placeId, String jsonObjectString);
 
-    ResponseEntity GetNearPlace(String parameter, String userId, String jsonObjectString);
+    ResponseEntity GetNearPlace(String userId);
 
-    ResponseEntity GetUserPlaceList(String userId, String userToken);
-
-    ResponseEntity GetUserOnePlaceInfo(String userId, String userToken);
 
 
 //    ResponseEntity AddOpen(String parameter, String userId, String placeId, String jsonObjectString, MultipartFile[] photos);

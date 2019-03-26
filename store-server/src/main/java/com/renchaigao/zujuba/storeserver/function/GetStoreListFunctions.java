@@ -2,6 +2,7 @@ package com.renchaigao.zujuba.storeserver.function;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
 import com.renchaigao.zujuba.mongoDB.info.store.StoreInfo;
@@ -13,6 +14,10 @@ import store.DistanceFunc;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_CHECK;
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_DAYOFF;
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_DO_BUSINESS;
 
 public class GetStoreListFunctions {
 
@@ -33,7 +38,9 @@ public class GetStoreListFunctions {
         String userCityCode = userAddress.getSelectCityCode();
         Double userX = userAddress.getLatitude(), userY = userAddress.getLongitude();
 //        获取同用户所在城市的所有商铺的信息，并存入redis，保留id、经纬度；
-        List<StoreInfo> storeInfosList = mongoTemplate.find(Query.query(Criteria.where("addressInfo.citycode").is(userCityCode)), StoreInfo.class);
+        List<StoreInfo> storeInfosList = mongoTemplate.find(
+                Query.query(Criteria.where("addressInfo.citycode").is(userCityCode))
+                , StoreInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
 //        计算在城市中所有商铺距离用户的距离，排序；
         StoreInfo storeInfoUse = new StoreInfo();
         for (int i = 0; i < storeInfosList.size(); i++) {
@@ -65,16 +72,16 @@ public class GetStoreListFunctions {
             jsonObject.put("name", storeInfo.getName());
 //        2组装店铺状态
             switch (storeInfo.getState()) {
-                case "C":
-                    jsonObject.put("state", "新创建");
-                    break;
-                case "S":
+//                case "C":
+//                    jsonObject.put("state", "新创建");
+//                    break;
+                case STORE_STATE_CHECK:
                     jsonObject.put("state", "审核中");
                     break;
-                case "Y":
+                case STORE_STATE_DO_BUSINESS:
                     jsonObject.put("state", "营业中");
                     break;
-                case "X":
+                case STORE_STATE_DAYOFF:
                     jsonObject.put("state", "打样中");
                     break;
             }
@@ -89,9 +96,9 @@ public class GetStoreListFunctions {
 //        5组装店铺人均消费
             jsonObject.put("spend", "人均:¥" + storeInfo.getStoreShoppingInfo().getAverageSpend().toString() + "/时");
 //        6组装店铺桌数
-            jsonObject.put("desknum", storeInfo.getStoreTeamInfo().getTodayDesk() + "/" + storeInfo.getMaxDeskSum());
+            jsonObject.put("desknum", storeInfo.getStoreTeamInfo().getTodayDesk() + "/" + storeInfo.getMaxTeams());
 //        7组装店铺人数
-            jsonObject.put("todaypeople", storeInfo.getStoreTeamInfo().getTodayPeople() + "/" + storeInfo.getMaxPeopleSum());
+            jsonObject.put("todaypeople", storeInfo.getStoreTeamInfo().getTodayPeople() + "/" + storeInfo.getMaxPeople());
 //        8组装店铺距离
             if (storeInfo.getAddressInfo().getDistance() > 1000) {
                 jsonObject.put("distance",
@@ -103,7 +110,8 @@ public class GetStoreListFunctions {
 //            DayBusinessInfo dayBusinessInfo =
 //                    storeInfo.getStoreBusinessInfo().getDayBusinessInfos().get(storeInfo.getStoreBusinessInfo().getDayBusinessInfos().size() - 1);
 //            jsonObject.put("time", dayBusinessInfo.getBusinessTimes().size() + "个时段");
-            jsonObject.put("time", storeInfo.getStoreBusinessInfo().getBusinessTimeInfos().size() + "个时段");
+//            jsonObject.put("time", storeInfo.getStoreBusinessInfo().getBusinessTimeInfos().size() + "个时段");
+            jsonObject.put("time",  "1个时段");
 //        10组装店铺排名、等荣誉
             switch (storeInfo.getStoreclass()) {
                 case "0":

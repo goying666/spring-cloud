@@ -11,6 +11,11 @@
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
+            <groupId>com.renchaigao.zujuba</groupId>
+            <artifactId>data20</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
@@ -46,11 +51,6 @@
             <version>1.0.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.renchaigao.zujuba</groupId>
-            <artifactId>data20</artifactId>
-            <version>1.0.1</version>
-        </dependency>
 
         <!--kafka-->
         <dependency>
@@ -124,4 +124,57 @@
 
     </dependencies>
 
+    <!--<build>-->
+        <!--<resources>-->
+            <!--<resource>-->
+                <!--&lt;!&ndash;把相对应的独特资源(dev,test,prod这三种的一种)声明，排除jsp文件&ndash;&gt;-->
+                <!--<directory>src/main/resources.${profiles.active}</directory>-->
+                <!--<excludes>-->
+                    <!--<exclude>*.jsp</exclude>-->
+                <!--</excludes>-->
+            <!--</resource>-->
+            <!--<resource>-->
+                <!--&lt;!&ndash;声明公共资源&ndash;&gt;-->
+                <!--<directory>src/main/resources</directory>-->
+            <!--</resource>-->
+        <!--</resources>-->
+    <!--</build>-->
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>dev/*</exclude>
+                    <exclude>prod/*</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources/${profiles.active}</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.yml</include>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources/</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.yml</include>
+                </includes>
+            </resource>
+        </resources>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <configuration>
+                        <encoding>utf-8</encoding>
+                        <useDefaultDelimiters>true</useDefaultDelimiters>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

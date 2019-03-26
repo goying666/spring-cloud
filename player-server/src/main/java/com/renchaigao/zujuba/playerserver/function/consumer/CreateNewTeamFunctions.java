@@ -8,6 +8,9 @@ import com.renchaigao.zujuba.mongoDB.info.team.TeamInfo;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamPlayerInfo;
 import com.renchaigao.zujuba.mongoDB.info.user.UserInfo;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import store.DistanceFunc;
 
 import java.util.ArrayList;
@@ -37,7 +40,7 @@ public class CreateNewTeamFunctions {
                 teamInfo.getAddressInfo().getLongitude(),
                 userInfo != null ? userInfo.getAddressInfo().getLatitude() : 0,
                 userInfo != null ? userInfo.getAddressInfo().getLongitude() : 0));
-        playerInfo.setComeFrom(PLAYER_COME_FROM[0]);
+        playerInfo.setComeFrom(PLAYER_COME_FROM_TEAMJOIN);
         playerInfo.setState(PLAYER_STATE[0]);
         playerInfo.setPlayerNumber(0); //玩家编号
 //        玩家开放信息设置
@@ -70,7 +73,11 @@ public class CreateNewTeamFunctions {
         teamPlayerInfo.setReadySum(0);
         teamPlayerInfo.setGameSum(0);
         teamPlayerInfo.setMissSum(teamInfo.getPlayerMin() - 1);
-        mongoTemplate.save(teamPlayerInfo,MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_PLAYER_INFO);
+        mongoTemplate.save(teamPlayerInfo, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_PLAYER_INFO);
+
+        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(teamPlayerInfo.getTeamId()))
+                , new Update().set("teamPlayerInfo", teamPlayerInfo)
+                , MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_TEAM_INFO);
         return teamPlayerInfo;
     }
 

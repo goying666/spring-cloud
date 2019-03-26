@@ -7,10 +7,12 @@ spring:
         config:
             server:
                 git:
-                    uri: https://github.com/goying666/config-server/
+                    uri: https://github.com/goying666/config-server
+#                    default-label: master
+                    search-paths: spring-cloud-dev,dev
 #                    username: 13040837899@163.com
 #                    password: code666.
-#                    label: master
+                    default-label: master
 
 aliyun:
     server: 47.106.149.105

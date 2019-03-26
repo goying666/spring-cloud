@@ -1,4 +1,4 @@
-package com.renchaigao.zujuba.storeserver.function;
+package com.renchaigao.zujuba.userserver.uti.mine;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -12,12 +12,16 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.util.ArrayList;
 
-public class UserPlaceFunctions {
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_CHECK;
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_DAYOFF;
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_DO_BUSINESS;
+
+public class MinePlaceFunctions {
 
     UserMapper userMapper;
     MongoTemplate mongoTemplate;
 
-    public UserPlaceFunctions(UserMapper userMapper, MongoTemplate mongoTemplate) {
+    public MinePlaceFunctions(UserMapper userMapper, MongoTemplate mongoTemplate) {
         this.userMapper = userMapper;
         this.mongoTemplate = mongoTemplate;
     }
@@ -33,33 +37,38 @@ public class UserPlaceFunctions {
         Integer state_open = 0, state_create = 0, state_wait = 0, state_close = 0;
         for (String i : arrayList) {
             StoreInfo storeInfo = mongoTemplate.findById(i, StoreInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
-            JSONObject json = new JSONObject();
-            json.put("imageurl", "showimage/" + userId + "/" + i + "/photo1.jpg");
-            json.put("userid", userId);
-            json.put("placeid", storeInfo.getId());
-//            jsonObject.pu;
-            json.put("name", storeInfo.getName());
-            json.put("state", storeInfo.getState());
-            switch (storeInfo.getState()) {
-                case "C":
-                    state_create++;
-                    break;
-                case "S":
-                    state_wait++;
-                    break;
-                case "Y":
-                    state_open++;
-                    break;
-                case "X":
-                    state_close++;
-                    break;
+            if (storeInfo != null) {
+                JSONObject json = new JSONObject();
+                json.put("imageurl", "showimage/" + userId + "/" + i + "/photo1.jpg");
+                json.put("userid", userId);
+                json.put("placeid", storeInfo.getId());
+                json.put("name", storeInfo.getName());
+                json.put("time", storeInfo.getCreateTime());
+                switch (storeInfo.getState()) {
+//                    case STORE_STATE_CHECK:
+//                        json.put("state", "创建中");
+//                        state_create++;
+//                        break;
+                        case STORE_STATE_CHECK:
+                        json.put("state", "审核中");
+                        state_wait++;
+                        break;
+                    case STORE_STATE_DO_BUSINESS:
+                        json.put("state", "营业中");
+                        state_open++;
+                        break;
+                    case STORE_STATE_DAYOFF:
+                        json.put("state", "停业中");
+                        state_close++;
+                        break;
 //                case "CLOSE":
 //                    state_close++;
 //                    break;
+                }
+                jsonArray.add(json);
             }
 //            获取系统给于店铺的评价（待开发）
 //            jsonObject.put("sysnote",storeInfo.get)
-            jsonArray.add(json);
         }
         jsonObject = new JSONObject();
         jsonObject.put("array", jsonArray);
@@ -79,7 +88,7 @@ public class UserPlaceFunctions {
         retJson.put("name", storeInfo.getName());
         retJson.put("state", storeInfo.getState());
         ArrayList<BusinessTimeInfo> businessTimeInfos = storeInfo.getStoreBusinessInfo().getBusinessTimeInfos();
-        retJson.put("businessTimeInfos",businessTimeInfos);
+        retJson.put("businessTimeInfos", businessTimeInfos);
         retJson.put("timeNum", businessTimeInfos.size());
         Integer i = 1;
         for (BusinessTimeInfo o : businessTimeInfos) {
@@ -90,7 +99,7 @@ public class UserPlaceFunctions {
         retJson.put("mapNote", storeInfo.getPlaceinfo());
 
         int num = 0;
-        for (DeskInfo o:storeInfo.getStoreHardwareInfo().getDeskInfos()){
+        for (DeskInfo o : storeInfo.getStoreHardwareInfo().getDeskInfos()) {
             num += o.getMaxUserNum();
         }
         retJson.put("allPeopleNum", num);

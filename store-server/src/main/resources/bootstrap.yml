@@ -24,6 +24,7 @@ eureka:
         instance-id: ${spring.cloud.client.ip-address}:${server.port}
         prefer-ip-address: true
 #        ip-address: ${aliyun.server}
+#        ip-address: ${eureka.instance.ip-address}
 aliyun:
     server: 47.106.149.105
 

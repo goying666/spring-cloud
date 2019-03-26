@@ -31,9 +31,9 @@ public class PlayerConsumerServiceImpl implements PlayerConsumerService {
         CreateNewTeamFunctions createNewTeamFunctions = new CreateNewTeamFunctions(mongoTemplate,userOpenInfoMapper);
 //        创建房主的player信息
         PlayerInfo createrPlayerInfo = createNewTeamFunctions.CreateOwnerPlayerInfo(teamInfo);
-        logger.info(createrPlayerInfo);
+//        logger.info(createrPlayerInfo);
 //        创建team对应的teamPlayerInfo
         TeamPlayerInfo teamPlayerInfo = createNewTeamFunctions.CreateTeamPlayerInfo(createrPlayerInfo,teamInfo);
-        logger.info(teamPlayerInfo);
+//        logger.info(teamPlayerInfo);
     }
 }

@@ -23,9 +23,35 @@ public class StoreController {
     @Autowired
     StringRedisTemplate redisTemplate;
 
-    @GetMapping(value = "/getone")
+    @GetMapping(value = "/getnear")
     @ResponseBody
     public ResponseEntity GetOneStoreInfo(
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "token") String token) {
+        if (!userMapper.selectByPrimaryKey(userId).getToken().equals(token))
+            return new ResponseEntity(RespCode.TOKENWRONG, null);
+        else
+            return storeServiceImpl.GetNearPlace(userId);
+    }
+
+    @PostMapping(value = "/add", consumes = "multipart/form-data")
+    @ResponseBody
+    public ResponseEntity AddStore(
+            @RequestParam("userId") String userId,
+            @RequestParam("storeId") String storeId,
+            @RequestParam(value = "token") String token,
+            @RequestParam("json") String jsonObjectString,
+            @RequestParam("photo") MultipartFile[] photos) {
+        if (!userMapper.selectByPrimaryKey(userId).getToken().equals(token))
+            return new ResponseEntity(RespCode.TOKENWRONG, null);
+        else
+            return storeServiceImpl.AddStore(userId, storeId, jsonObjectString, photos);
+    }
+
+    @GetMapping(value = "/getone/{where}")
+    @ResponseBody
+    public ResponseEntity GetOneStoreInfo(
+            @PathVariable(value = "where") String whichFunc,
             @RequestParam(value = "userId") String userId,
             @RequestParam(value = "storeId") String storeId,
             @RequestParam(value = "token") String token,
@@ -35,57 +61,41 @@ public class StoreController {
             return new ResponseEntity(RespCode.TOKENWRONG, null);
         else if (news != null && news.equals(lastTime))
             return new ResponseEntity(RespCode.WARN, null);
-        else
-            return storeServiceImpl.GetOneStoreInfo(userId, storeId);
-    }
-
-    @GetMapping(value = "/{firstStr}/{secondStr}/{thirdStr}/{fourthStr}")
-    @ResponseBody
-    public ResponseEntity PlaceAboutUserControllerFuns(@PathVariable("firstStr") String fistStr,
-                                                       @PathVariable("secondStr") String secondStr,
-                                                       @PathVariable("thirdStr") String thirdStr,
-                                                       @PathVariable("fourthStr") String fourthStr) {
-        switch (fistStr) {
-            case "user":
-                switch (secondStr) {
-                    case "allcreate":
-                        return storeServiceImpl.GetUserPlaceList(thirdStr, fourthStr);
-                    case "one":
-                        return storeServiceImpl.GetUserOnePlaceInfo(thirdStr, fourthStr);
-                }
-                break;
+        else {
+            switch (whichFunc) {
+                case "main":
+                    return storeServiceImpl.GetOneStoreInfo(userId, storeId);
+                case "team":
+                    return storeServiceImpl.GetOneStoreTeamInfo(userId, storeId);
+                case "club":
+                    return storeServiceImpl.GetOneStoreClubInfo(userId, storeId);
+                case "comment":
+                    return storeServiceImpl.GetOneStoreCommentInfo(userId, storeId);
+                case "game":
+                    return storeServiceImpl.GetOneStoreGameInfo(userId, storeId);
+            }
         }
-        return new ResponseEntity(RespCode.WRONGIP, null);
+        return new ResponseEntity(RespCode.STORE_INFO_GET_FAIL, null);
     }
 
-
-    @PostMapping(value = "/{firstStr}/{secondStr}/{thirdStr}/{fourthStr}", consumes = "multipart/form-data")
+    @GetMapping(value = "/manager/get/{firstStr}")
     @ResponseBody
-    public ResponseEntity PlaceControllerFuns(@PathVariable("firstStr") String fistStr,
-                                              @PathVariable("secondStr") String secondStr,
-                                              @PathVariable("thirdStr") String thirdStr,
-                                              @PathVariable("fourthStr") String fourthStr,
-                                              @RequestParam("json") String jsonObjectString,
-                                              @RequestParam("photo") MultipartFile[] photos) {
-        switch (fistStr) {
-            case "store":
-                switch (secondStr) {
-                    case "join":
-                        return storeServiceImpl.JoinPlace(thirdStr, fourthStr, jsonObjectString, photos);
-                    case "getnear":
-                        return storeServiceImpl.GetNearPlace(thirdStr, fourthStr, jsonObjectString);
-                }
-                break;
-            case "user":
-                switch (secondStr) {
-                    case "allcreate":
-                        return storeServiceImpl.GetUserPlaceList(thirdStr, fourthStr);
-                    case "one":
-                        return storeServiceImpl.GetUserOnePlaceInfo(thirdStr, fourthStr);
-                }
-                break;
+    public ResponseEntity ManagerGetOneStoreInfo(
+            @PathVariable(value = "firstStr") String firstStr,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "storeId") String storeId,
+            @RequestParam(value = "token") String token) {
+        if (!userMapper.selectByPrimaryKey(userId).getToken().equals(token))
+            return new ResponseEntity(RespCode.TOKENWRONG, null);
+        else {
+            switch (firstStr) {
+                case "basic":
+                    return storeServiceImpl.ManagerGetOneStoreInfo(userId, storeId);
+
+            }
         }
-        return new ResponseEntity(RespCode.WRONGIP, null);
+        return new ResponseEntity(RespCode.FAIL, null);
     }
+
 }
 

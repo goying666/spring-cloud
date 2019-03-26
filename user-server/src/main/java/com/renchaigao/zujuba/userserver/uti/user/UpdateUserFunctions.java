@@ -1,4 +1,4 @@
-package com.renchaigao.zujuba.userserver.uti;
+package com.renchaigao.zujuba.userserver.uti.user;
 
 import com.alibaba.fastjson.JSONObject;
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
@@ -39,6 +39,15 @@ public class UpdateUserFunctions {
      */
     public ResponseEntity UpdateUserBasicPartFunction(String userId, JSONObject userJson) {
         User userOld = userMapper.selectByPrimaryKey(userId);
+
+        //        更新签名
+        if (userJson.getString("signature") != null) {
+            return new ResponseEntity(RespCode.USER_UPDATE_INFO_SUCCESS
+                    , mongoTemplate.findAndModify(Query.query(Criteria.where("_id").is(userId))
+                    , new Update().set("signature", userJson.getString("signature"))
+                    , UserInfo.class
+                    , MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_INFO));
+        }
         //        更新昵称
         if (userJson.getString("nickName") != null) {
             userOld.setNickName(userJson.getString("nickName"));
@@ -80,15 +89,19 @@ public class UpdateUserFunctions {
 //        if (userJson.getString("userPWD") != null) {
 //            userOld.setUserPWD(userJson.getString("userPWD"));
 //        }
+
+
         if (userMapper.updateByPrimaryKeySelective(userOld) == 1) {
             UserOpenInfo userOpenInfo = JSONObject.parseObject(JSONObject.toJSONString(userOld), UserOpenInfo.class);
             userOpenInfo.setUserId(userOld.getId());
             userOpenInfoMapper.updateByPrimaryKeySelective(userOpenInfo);
-            UserInfo userInfo = AssembleAllInfo(userId, userOld);
-            userInfo.setUpTime(dateUse.GetStringDateNow());
-            mongoTemplate.save(userInfo, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_INFO);
-            return new ResponseEntity(RespCode.USER_UPDATE_INFO_SUCCESS, userInfo);
-        }return new ResponseEntity(RespCode.USER_UPDATE_INFO_FAIL,null);
+        } else {
+            return new ResponseEntity(RespCode.USER_UPDATE_INFO_FAIL, null);
+        }
+        UserInfo userInfo = AssembleAllInfo(userId, userOld);
+        userInfo.setUpTime(dateUse.GetStringDateNow());
+        mongoTemplate.save(userInfo, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_INFO);
+        return new ResponseEntity(RespCode.USER_UPDATE_INFO_SUCCESS, userInfo);
     }
 
 

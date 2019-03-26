@@ -1,4 +1,4 @@
-package com.renchaigao.zujuba.userserver.uti;
+package com.renchaigao.zujuba.userserver.uti.user;
 
 import com.renchaigao.zujuba.dao.User;
 import com.renchaigao.zujuba.dao.UserLogin;

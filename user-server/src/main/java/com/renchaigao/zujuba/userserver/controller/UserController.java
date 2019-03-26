@@ -66,17 +66,4 @@ public class UserController {
         } else return new ResponseEntity(RespCode.TOKENWRONG, null);
     }
 
-
-    @GetMapping(value = "/getmine")
-    @ResponseBody
-    public ResponseEntity GetUserMineInfo(
-            @RequestParam(value = "userId") String userId,
-            @RequestParam(value = "token") String token) {
-        if (!userMapper.selectByPrimaryKey(userId).getToken().equals(token))
-            return new ResponseEntity(RespCode.TOKENWRONG, null);
-        else
-            return userServiceImpl.GetUserMineInfo(userId);
-    }
-
-
 }

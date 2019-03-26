@@ -1,15 +1,15 @@
-package com.renchaigao.zujuba.placeserver.function;
+package com.renchaigao.zujuba.storeserver.function;
 
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
 import com.renchaigao.zujuba.mongoDB.info.Photo;
-import com.renchaigao.zujuba.mongoDB.info.store.*;
 import com.renchaigao.zujuba.mongoDB.info.store.BusinessPart.StoreBusinessInfo;
 import com.renchaigao.zujuba.mongoDB.info.store.EquipmentPart.StoreEquipmentInfo;
 import com.renchaigao.zujuba.mongoDB.info.store.GoodsPart.StorePackageInfo;
 import com.renchaigao.zujuba.mongoDB.info.store.HardwarePart.DeskInfo;
 import com.renchaigao.zujuba.mongoDB.info.store.HardwarePart.StoreHardwareInfo;
+import com.renchaigao.zujuba.mongoDB.info.store.*;
 import com.renchaigao.zujuba.mongoDB.info.team.TeamInfo;
 import com.renchaigao.zujuba.mongoDB.info.user.UserPlaces;
 import normal.dateUse;
@@ -19,16 +19,20 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class JoinStoreFunctions {
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_CHECK;
+
+public class AddStoreFunctions {
 
     UserMapper userMapper;
     MongoTemplate mongoTemplate;
 
-    public JoinStoreFunctions(UserMapper userMapper, MongoTemplate mongoTemplate) {
+    public AddStoreFunctions(UserMapper userMapper, MongoTemplate mongoTemplate) {
         this.userMapper = userMapper;
         this.mongoTemplate = mongoTemplate;
     }
@@ -78,13 +82,10 @@ public class JoinStoreFunctions {
     /*
      * 说明：检查创建信息正确性、完整性
      */
-    public Boolean CheckCreatInfoIsOk(String placeId, String jsonObjectString, MultipartFile[] photos) {
+    public Boolean CheckCreatInfoIsOk(String storeId, String storeInfoStr, MultipartFile[] photos) {
 //        其他检查项，待开发：
-        TeamInfo teamInfo = mongoTemplate.findById(placeId, TeamInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
-        if (teamInfo != null) {
-            return false;
-        }
-        return !jsonObjectString.isEmpty() && photos.length != 0;
+        StoreInfo storeInfo = mongoTemplate.findById(storeId, StoreInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
+        return storeInfo == null && storeInfoStr != null && photos.length != 0;
     }
 
 
@@ -95,7 +96,7 @@ public class JoinStoreFunctions {
         storeInfo.setUpTime(dateUse.DateToString(new Date()));
         storeInfo.setCreaterId(storeInfo.getOwnerId());
         storeInfo.setCreateTime(dateUse.DateToString(new Date()));
-        storeInfo.setState("S");
+        storeInfo.setState(STORE_STATE_CHECK);
         storeInfo.setDeleteStyle(false);
         mongoTemplate.save(storeInfo);
     }

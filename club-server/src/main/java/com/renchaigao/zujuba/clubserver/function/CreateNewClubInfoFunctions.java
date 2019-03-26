@@ -9,6 +9,7 @@ import com.renchaigao.zujuba.mongoDB.info.club.ClubInfo;
 import com.renchaigao.zujuba.mongoDB.info.club.ClubUserInfo;
 import com.renchaigao.zujuba.mongoDB.info.message.MessageContent;
 import com.renchaigao.zujuba.mongoDB.info.store.StoreInfo;
+import com.renchaigao.zujuba.mongoDB.info.user.UserClubInfo;
 import normal.dateUse;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -16,9 +17,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.util.ArrayList;
+
 import static com.renchaigao.zujuba.PropertiesConfig.ClubConstant.ROLE_CREATER;
-import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.CLUB_SEND_MESSAGE;
-import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.CONFIG_RENAME_CLUB_TIMES;
+import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.*;
 import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.GENDER_BOY;
 import static com.renchaigao.zujuba.PropertiesConfig.UserConstant.GENDER_GIRL;
 
@@ -63,10 +65,27 @@ public class CreateNewClubInfoFunctions {
         teamPart(clubInfo);
 //        4、消息信息部分 和 人员相关信息（场地管理者和创建者的基本信息）
         messagePart(clubInfo);
+//        5、场地信息部分
+        placePart(clubInfo);
         return new ResponseEntity(RespCode.SUCCESS, clubInfo);
     }
 
+    private void placePart(ClubInfo clubInfo) {
+        switch (clubInfo.getPlaceClass()) {
+            case ADDRESS_CLASS_STORE:
+                normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(clubInfo.getPlaceId()))
+                        , new Update().push("storeClubIdArrayList", clubInfo.getId())
+                        , MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
+                break;
+            case ADDRESS_CLASS_OPEN:
+                break;
+            case ADDRESS_CLASS_USER:
+                break;
+        }
+    }
+
     private void basicPart(ClubInfo clubInfo) {
+
         clubInfo.setUpTime(dateUse.GetStringDateNow());
 //        添加创建者的男女性别
         String gender = userMapper.selectByPrimaryKey(clubInfo.getCreaterId()).getGender();
@@ -80,9 +99,10 @@ public class CreateNewClubInfoFunctions {
         }
         clubInfo.setAllPeopleNum(clubInfo.getAllPeopleNum() + 1);
         clubInfo.setRenameTimesLimit(CONFIG_RENAME_CLUB_TIMES);
-        String placeAdminId = normalMongoTemplate.findById(clubInfo.getPlaceId(), StoreInfo.class,MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO).getOwnerId();
+        String placeAdminId = normalMongoTemplate.findById(clubInfo.getPlaceId(), StoreInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO).getOwnerId();
         clubInfo.getUserIdList().add(clubInfo.getCreaterId());
-        clubInfo.getUserIdList().add(placeAdminId);
+        if (!placeAdminId.equals(clubInfo.getCreaterId()))
+            clubInfo.getUserIdList().add(placeAdminId);
     }
 
     private void userPart(ClubInfo clubInfo) {
@@ -103,13 +123,13 @@ public class CreateNewClubInfoFunctions {
     private void messagePart(ClubInfo clubInfo) {
 //        修改场地相关信息
         normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(clubInfo.getPlaceId())),
-                new Update().push("StoreClubArray",clubInfo.getId()),MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
+                new Update().push("StoreClubArray", clubInfo.getId()), MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
 //        场地信息人发言
         MessageContent userMessageContent = new MessageContent();
         Long nowTimeLong = dateUse.getNowTimeLong();
         userMessageContent.setIsMe(true);
         userMessageContent.setContent("大家好，我是俱乐部所在场地的负责人，有关场地的任何问题可以咨询我，祝您玩的愉快。");
-        String placeAdminId = normalMongoTemplate.findById(clubInfo.getPlaceId(), StoreInfo.class,MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO).getOwnerId();
+        String placeAdminId = normalMongoTemplate.findById(clubInfo.getPlaceId(), StoreInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO).getOwnerId();
         userMessageContent.setTitle(clubInfo.getClubName());
         userMessageContent.setSenderId(placeAdminId);
         userMessageContent.setMessageClass(CLUB_SEND_MESSAGE);
@@ -136,13 +156,21 @@ public class CreateNewClubInfoFunctions {
         userMessageContent.setClubId(clubInfo.getId());
         userMessageContent.getReadList().addAll(clubInfo.getUserIdList());//增加消息阅读者——创建地的管理员 和 创建人
         kafkaTemplate.send(CLUB_SEND_MESSAGE, JSONObject.toJSONString(userMessageContent));
-
-//        修改场地负责人的场地信息
-        normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(placeAdminId)),
-                new Update().push("clubIdList",clubInfo.getId()),MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_CLUB_INFO);
 //        创建人的相关信息更新
         normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(clubInfo.getCreaterId()))
-                ,new Update().push("myClubList",clubInfo.getId()).push("clubIdList",clubInfo.getId()),MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_CLUB_INFO);
+                , new Update().push("myClubList", clubInfo.getId()).push("clubIdList", clubInfo.getId()), MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_CLUB_INFO);
+
+//        修改场地负责人的场地信息
+        ArrayList<String> oldList = normalMongoTemplate.findById(placeAdminId, UserClubInfo.class
+                , MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_CLUB_INFO).getClubIdList();
+        Boolean haveSameOne = false;
+        for (String s : oldList) {
+            if (s.equals(clubInfo.getId()))
+                haveSameOne = true;
+        }
+        if (!haveSameOne)
+            normalMongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(placeAdminId)),
+                    new Update().push("clubIdList", clubInfo.getId()), MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_USER_CLUB_INFO);
     }
 
 }

@@ -131,6 +131,7 @@ public class GetNearTeamListFunctions {
             } else {
                 json.put("currentPlayer", currentPlayerNum + "/" + maxPlayerNum + "人)");
             }
+
             int day = dateUse.CompareTwoStringDate(dateUse.getTodayDate(), o.getStartDate());
             if (day == 0) {
                 json.put("date", "今天");
@@ -156,6 +157,7 @@ public class GetNearTeamListFunctions {
             } else {
                 json.put("lave", ">24小时");
             }
+
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             Calendar calendar = Calendar.getInstance();
             try {

@@ -1,4 +1,4 @@
-package com.renchaigao.zujuba.userserver.uti;
+package com.renchaigao.zujuba.userserver.uti.user;
 
 import com.alibaba.fastjson.JSONObject;
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
@@ -13,6 +13,7 @@ import com.renchaigao.zujuba.domain.response.ResponseEntity;
 import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
 import com.renchaigao.zujuba.mongoDB.info.VerificationCodeInfo;
 import com.renchaigao.zujuba.mongoDB.info.user.*;
+import com.renchaigao.zujuba.userserver.uti.AuthenticationCodeMethod;
 import normal.TokenMaker;
 import normal.UUIDUtil;
 import normal.dateUse;

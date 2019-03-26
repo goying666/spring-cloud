@@ -90,13 +90,16 @@ public class CreateNewTeamFunctions {
     /*
      * 说明：地址信息
      */
-    public void CreateTeamInfoAddress(TeamInfo teamInfo ) {
+    public void CreateTeamInfoAddress(TeamInfo teamInfo) {
         Address createAddress = mongoTemplate.findById(teamInfo.getAddressInfo().getId(),
                 AddressInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_ADDRESS_INFO);
         switch (createAddress.getAddressClass()) {
             case ADDRESS_CLASS_STORE:
 //                通知place-server有新组局创建；
                 kafkaTemplate.send(CREATE_NEW_TEAM, JSONObject.toJSONString(teamInfo));
+                mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(teamInfo.getAddressInfo().getId()))
+                        , new Update().push("storeTeamIdArrayList", teamInfo.getId())
+                        , MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
 //                更新场地组局信息（增加）
                 break;
             case ADDRESS_CLASS_OPEN:
