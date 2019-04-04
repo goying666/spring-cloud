@@ -10,8 +10,8 @@ spring:
                     uri: https://github.com/goying666/config-server
 #                    default-label: master
                     search-paths: spring-cloud-dev,dev
-#                    username: 13040837899@163.com
-#                    password: code666.
+                    username: 13040837899@163.com
+                    password: code666.
                     default-label: master
 
 aliyun:
@@ -32,4 +32,4 @@ eureka:
         lease-renewal-interval-in-seconds: 20
         instance-id: ${spring.cloud.client.ip-address}:${server.port}
         prefer-ip-address: true
-        ip-address: ${aliyun.server}
+#        ip-address: ${aliyun.server}

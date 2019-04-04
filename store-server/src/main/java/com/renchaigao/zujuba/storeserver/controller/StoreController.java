@@ -1,5 +1,7 @@
 package com.renchaigao.zujuba.storeserver.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.renchaigao.zujuba.PageBean.StoreManagerBasicFragmentBean;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
@@ -25,7 +27,7 @@ public class StoreController {
 
     @GetMapping(value = "/getnear")
     @ResponseBody
-    public ResponseEntity GetOneStoreInfo(
+    public ResponseEntity GetNearStoreList(
             @RequestParam(value = "userId") String userId,
             @RequestParam(value = "token") String token) {
         if (!userMapper.selectByPrimaryKey(userId).getToken().equals(token))
@@ -46,6 +48,25 @@ public class StoreController {
             return new ResponseEntity(RespCode.TOKENWRONG, null);
         else
             return storeServiceImpl.AddStore(userId, storeId, jsonObjectString, photos);
+    }
+
+    @PostMapping(value = "/manager/update/{firstStr}", consumes = "multipart/form-data")
+    @ResponseBody
+    public ResponseEntity ManagerUpdateStoreInfo(
+            @PathVariable(value = "firstStr") String firstStr,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "storeId") String storeId,
+            @RequestParam(value = "token") String token,
+            @RequestParam("json") String jsonObjectString) {
+        if (!userMapper.selectByPrimaryKey(userId).getToken().equals(token))
+            return new ResponseEntity(RespCode.TOKENWRONG, null);
+        else {
+            switch (firstStr) {
+                case "basic":
+                    return storeServiceImpl.ManagerUpdateOneStoreInfo(userId, storeId, JSONObject.parseObject(jsonObjectString, StoreManagerBasicFragmentBean.class));
+            }
+        }
+        return new ResponseEntity(RespCode.FAIL, null);
     }
 
     @GetMapping(value = "/getone/{where}")
@@ -91,7 +112,6 @@ public class StoreController {
             switch (firstStr) {
                 case "basic":
                     return storeServiceImpl.ManagerGetOneStoreInfo(userId, storeId);
-
             }
         }
         return new ResponseEntity(RespCode.FAIL, null);

@@ -19,6 +19,9 @@ import normal.dateUse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -199,38 +202,103 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public ResponseEntity ManagerGetOneStoreInfo(String userId, String storeId) {
-        StoreInfo storeInfo = mongoTemplate.findById(storeId,StoreInfo.class,MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
-        StoreManagerBasicFragmentBean storeManagerBasicFragmentBean = new StoreManagerBasicFragmentBean();
-
-        storeManagerBasicFragmentBean.setSumOfHardware("0");
+        try {
+            StoreInfo storeInfo = mongoTemplate.findById(storeId, StoreInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
+            StoreManagerBasicFragmentBean o = new StoreManagerBasicFragmentBean();
 //       根据已有的店铺状态进行设置
-        switch (storeInfo.getState()) {
+            switch (storeInfo.getState()) {
 //                case "C":
 //                    storeActivityBean.setState("新创建");
 //                    break;
-            case STORE_STATE_CHECK:
-                storeManagerBasicFragmentBean.setStoreState("审核");
-                break;
-            case STORE_STATE_DO_BUSINESS:
-                storeManagerBasicFragmentBean.setStoreState("营业");
-                break;
-            case STORE_STATE_DAYOFF:
-                storeManagerBasicFragmentBean.setStoreState("打样");
-                break;
-        }
+                case STORE_STATE_CHECK:
+                    o.setState("审核");
+                    break;
+                case STORE_STATE_DO_BUSINESS:
+                    o.setState("营业");
+                    break;
+                case STORE_STATE_DAYOFF:
+                    o.setState("不营业");
+                    break;
+            }
 
-        storeManagerBasicFragmentBean.setStoreName(storeInfo.getName());
-        storeManagerBasicFragmentBean.setStoreNotes(storeInfo.getPlaceinfo());
-        storeManagerBasicFragmentBean.setAddressInfo(storeInfo.getAddressInfo().getFormatAddress());
-        storeManagerBasicFragmentBean.setAddressNotes(storeInfo.getAddressNote());
-
-
+            o.setNotes(storeInfo.getStoreNote());
+            o.setName(storeInfo.getName());
+            o.setMaxPeople(storeInfo.getMaxPeople().toString());
+            o.setMaxDesk(storeInfo.getMaxTeams().toString());
+            o.setAddressInfo(storeInfo.getAddressInfo().getFormatAddress());
+            o.setAddressNote(storeInfo.getAddressNote());
+            o.setIsInside(storeInfo.getIsInside());
+            o.setAddressInfos(storeInfo.getAddressInfo());
 //        获取已有的时间限制条件，没有就默认给系统附带的默认条件；
 //                获取已有的硬件设施库，进行比对，没有的就标记为无；
-
-        return null;
+            return new ResponseEntity(RespCode.SUCCESS, o);
+        } catch (Exception e) {
+            return new ResponseEntity(RespCode.EXCEPTION, e);
+        }
     }
 
+    @Override
+    public ResponseEntity ManagerUpdateOneStoreInfo(String userId, String storeId, StoreManagerBasicFragmentBean o) {
+        try {
+            StoreInfo storeInfo = mongoTemplate.findById(storeId, StoreInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
+            if (storeInfo != null) {
+                Update update = new Update();
+                switch (o.getState()) {
+                    case "审核":
+                        if (!storeInfo.getState().equals(STORE_STATE_CHECK)) {
+                            update.set("state", STORE_STATE_CHECK);
+                        }
+                        break;
+                    case "营业":
+                        if (!storeInfo.getState().equals(STORE_STATE_DO_BUSINESS)) {
+                            update.set("state", STORE_STATE_DO_BUSINESS);
+                        }
+                        break;
+                    case "不营业":
+                        if (!storeInfo.getState().equals(STORE_STATE_DAYOFF)) {
+                            update.set("state", STORE_STATE_DAYOFF);
+                        }
+                        break;
+                }
+//                storeInfo.setStoreNote(o.getNotes());
+//                storeInfo.setName(o.getName());
+//                storeInfo.setMaxPeople(Integer.valueOf(o.getMaxPeople()));
+//                storeInfo.setMaxTeams(Integer.valueOf(o.getMaxDesk()));
+//                storeInfo.setAddressInfo(o.getAddressInfos());
+//                storeInfo.setAddressNote(o.getAddressNote());
+//                storeInfo.setIsInside(o.getIsInside());
+                if (!o.getNotes().equals(storeInfo.getStoreNote())) {
+                    update.set("storeNote", o.getNotes());
+                }
+                if (!o.getName().equals(storeInfo.getName())) {
+                    update.set("name", o.getName());
+                }
+                if (!o.getMaxPeople().equals(storeInfo.getMaxPeople().toString())) {
+                    update.set("maxPeople", o.getMaxPeople());
+                }
+                if (!o.getMaxDesk().equals(storeInfo.getMaxTeams().toString())) {
+                    update.set("maxTeams", o.getMaxDesk());
+                }
+                if (!o.getAddressInfos().equals(storeInfo.getAddressInfo())) {
+                    update.set("addressInfo", o.getAddressInfos());
+                }
+                if (!o.getAddressNote().equals(storeInfo.getAddressNote())) {
+                    update.set("addressNote", o.getAddressNote());
+                }
+                if (!o.getIsInside().equals(storeInfo.getIsInside())) {
+                    update.set("isInside", o.getIsInside());
+                }
+                mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(storeId))
+                        , update, StoreInfo.class, MongoDBCollectionsName.MONGO_DB_COLLECIONS_NAME_STORE_INFO);
+                return new ResponseEntity(RespCode.SUCCESS, null);
+            } else {
+                return new ResponseEntity(RespCode.WARN, null);
+            }
+
+        } catch (Exception e) {
+            return new ResponseEntity(RespCode.EXCEPTION, e);
+        }
+    }
 
     @Override
     public ResponseEntity GetNearPlace(String userId) {

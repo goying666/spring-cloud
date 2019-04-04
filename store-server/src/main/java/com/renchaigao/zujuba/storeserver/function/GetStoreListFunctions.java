@@ -5,12 +5,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.renchaigao.zujuba.PropertiesConfig.MongoDBCollectionsName;
 import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
+import com.renchaigao.zujuba.mongoDB.info.store.BusinessPart.OffWorkLimit;
 import com.renchaigao.zujuba.mongoDB.info.store.StoreInfo;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import store.DistanceFunc;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +20,10 @@ import java.util.List;
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_CHECK;
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_DAYOFF;
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_DO_BUSINESS;
+import static com.renchaigao.zujuba.mongoDB.info.store.BusinessPart.OffWorkLimit.*;
+import static com.renchaigao.zujuba.mongoDB.info.store.StoreInfo.*;
+import static com.renchaigao.zujuba.mongoDB.info.store.StoreInfo.PLACE_CLASS_COMMUNITY;
+import static com.renchaigao.zujuba.mongoDB.info.store.StoreInfo.PLACE_CLASS_SQUARE;
 
 public class GetStoreListFunctions {
 
@@ -88,8 +94,10 @@ public class GetStoreListFunctions {
 //        3组装店铺评分
             if (storeInfo.getStoreEvaluationInfo().getStoreScore() == 0) {
                 jsonObject.put("score", "0.0分");
+                jsonObject.put("realScore", 0);
             } else {
                 jsonObject.put("score", storeInfo.getStoreEvaluationInfo().getStoreScore().toString() + "分");
+                jsonObject.put("realScore", storeInfo.getStoreEvaluationInfo().getStoreScore());
             }
 //        4组装店铺多少人玩过
             jsonObject.put("allpeoplenum", storeInfo.getStoreTeamInfo().getAllUsersNum().toString() + "人玩过");
@@ -107,24 +115,59 @@ public class GetStoreListFunctions {
                 jsonObject.put("distance", storeInfo.getAddressInfo().getDistance().toString() + "米");
             }
 //        9组装店铺时段
+            ArrayList<OffWorkLimit> offWorkLimits = storeInfo.getOffworkLimitList();
+//            for (OffWorkLimit o:offWorkLimits){
+//                switch (o.getLimitClass()){
+//                    case LIMIT_EVERY_DAY:
+//                        break;
+//                    case LIMIT_EVERY_WEEK_1:
+//                        break;
+//                    case LIMIT_EVERY_WEEK_2:
+//                        break;
+//                    case LIMIT_EVERY_WEEK_3:
+//                        break;
+//                    case LIMIT_EVERY_WEEK_4:
+//                        break;
+//                    case LIMIT_EVERY_WEEK_5:
+//                        break;
+//                    case LIMIT_EVERY_WEEK_6:
+//                        break;
+//                    case LIMIT_EVERY_WEEK_7:
+//                        break;
+//                    case LIMIT_WEEK_1_TO_5:
+//                        break;
+//                    case LIMIT_WEEK_6_TO_7:
+//                        break;
+//                    case LIMIT_ONE_DAY:
+//                        break;
+//                    case LIMIT_NEAR_HOLIDAY:
+//                        break;
+//                }
+//            }
 //            DayBusinessInfo dayBusinessInfo =
 //                    storeInfo.getStoreBusinessInfo().getDayBusinessInfos().get(storeInfo.getStoreBusinessInfo().getDayBusinessInfos().size() - 1);
 //            jsonObject.put("time", dayBusinessInfo.getBusinessTimes().size() + "个时段");
-//            jsonObject.put("time", storeInfo.getStoreBusinessInfo().getBusinessTimeInfos().size() + "个时段");
-            jsonObject.put("time",  "1个时段");
+            jsonObject.put("time", storeInfo.getStoreBusinessInfo().getBusinessTimeInfos().size() + "个时段");
+//            jsonObject.put("time",  "1个时段");
 //        10组装店铺排名、等荣誉
-            switch (storeInfo.getStoreclass()) {
-                case "0":
-                    jsonObject.put("class", "餐馆");
-                    break;
-                case "1":
+            switch (storeInfo.getStoreClassInt()) {
+                case PLACE_CLASS_ZYB:
                     jsonObject.put("class", "桌游吧");
                     break;
-                case "2":
+                case PLACE_CLASS_RESTAURANT:
+                    jsonObject.put("class", "餐馆");
+                    break;
+                case PLACE_CLASS_HOMESTAY:
                     jsonObject.put("class", "民宿");
                     break;
-                case "3":
-                    jsonObject.put("class", "其他");
+                case PLACE_CLASS_SCHOOL:
+                    jsonObject.put("class", "学校");
+                    break;
+                case PLACE_CLASS_SQUARE:
+                    jsonObject.put("class", "广场");
+                    break;
+                case PLACE_CLASS_COMMUNITY:
+                    jsonObject.put("class", "社区");
                     break;
             }
 //        11组装店铺备注
@@ -133,6 +176,11 @@ public class GetStoreListFunctions {
             jsonObject.put("evaluate_1", "环境很nice");
 //        13组装店铺评论2
             jsonObject.put("evaluate_2", "价格公道");
+
+            jsonObject.put("realDistance", storeInfo.getAddressInfo().getDistance());
+            jsonObject.put("realStar", storeInfo.getStoreIntegrationInfo().getStartNum() == null ? 1 : storeInfo.getStoreIntegrationInfo().getStartNum());
+//            jsonObject.put("realSpend", storeInfo.getStoreIntegrationInfo().getStartNum());
+
             retJsonArray.add(jsonObject);
         }
 

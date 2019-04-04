@@ -7,6 +7,8 @@ import com.renchaigao.zujuba.dao.mapper.UserMapper;
 import com.renchaigao.zujuba.domain.response.RespCode;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
 import com.renchaigao.zujuba.mongoDB.info.AddressInfo;
+import com.renchaigao.zujuba.mongoDB.info.store.BusinessPart.DayBusinessInfo;
+import com.renchaigao.zujuba.mongoDB.info.store.BusinessPart.StoreBusinessInfo;
 import com.renchaigao.zujuba.mongoDB.info.store.StoreInfo;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import store.DistanceFunc;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_CHECK;
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_DAYOFF;
 import static com.renchaigao.zujuba.PropertiesConfig.ConstantManagement.STORE_STATE_DO_BUSINESS;
+import static com.renchaigao.zujuba.mongoDB.info.store.StoreInfo.*;
 
 public class GetOneStoreFunctions {
 
@@ -89,29 +92,30 @@ public class GetOneStoreFunctions {
                 storeActivityBean.setDistance(distance.toString() + "m");
             }
 //        9组装店铺时段
-//            DayBusinessInfo dayBusinessInfo =
-//                    storeInfo.getStoreBusinessInfo().getDayBusinessInfos().get(storeInfo.getStoreBusinessInfo().getDayBusinessInfos().size() - 1);
-//            jsonObject.put("time", dayBusinessInfo.getBusinessTimes().size() + "个时段");
-            jsonObject.put("time", storeInfo.getStoreBusinessInfo().getBusinessTimeInfos().size() + "个时段");
+//            jsonObject.put("time", storeInfo.getStoreBusinessInfo().getBusinessTimeInfos().size() + "个时段");
+            storeActivityBean.setBusinessTimeList(storeInfo.getStoreBusinessInfo().getBusinessTimeInfos());
 //        10组装店铺排名、等荣誉
-            switch (storeInfo.getStoreclass()) {
-                case "0":
-//                jsonObject.put("class", "餐馆");
-                    storeActivityBean.setStoreclass("餐馆");
-                    break;
-                case "1":
-//                jsonObject.put("class", "");
+            switch (storeInfo.getStoreClassInt()) {
+                case PLACE_CLASS_ZYB:
                     storeActivityBean.setStoreclass("桌游吧");
                     break;
-                case "2":
-//                jsonObject.put("class", "");
+                case PLACE_CLASS_RESTAURANT:
+                    storeActivityBean.setStoreclass("餐馆");
+                    break;
+                case PLACE_CLASS_HOMESTAY:
                     storeActivityBean.setStoreclass("民宿");
                     break;
-                case "3":
-//                jsonObject.put("class", "");
-                    storeActivityBean.setStoreclass("其他");
+                case PLACE_CLASS_SCHOOL:
+                    storeActivityBean.setStoreclass("学校");
+                    break;
+                case PLACE_CLASS_SQUARE:
+                    storeActivityBean.setStoreclass("广场");
+                    break;
+                case PLACE_CLASS_COMMUNITY:
+                    storeActivityBean.setStoreclass("社区");
                     break;
             }
+            storeActivityBean.setStoreClassInt(storeInfo.getStoreClassInt());
 //        11组装店铺备注
             storeActivityBean.setPlaceinfo(storeInfo.getPlaceinfo());
 //        jsonObject.put("note", "本店已入驻组局吧，希望通过我们的努力，将我市的桌游文化发展起来。");
@@ -141,6 +145,7 @@ public class GetOneStoreFunctions {
             storeActivityBean.setCommentTimes("0");
 //        组局信息
 //        套餐信息
+            storeActivityBean.setHardwareList(storeInfo.getHardwareList());
             return new ResponseEntity(RespCode.STORE_INFO_GET_SUCCESS, storeActivityBean);
         } catch (Exception e) {
             return new ResponseEntity(RespCode.STORE_INFO_GET_FAIL, e);

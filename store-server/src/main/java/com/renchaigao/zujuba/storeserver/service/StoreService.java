@@ -1,5 +1,6 @@
 package com.renchaigao.zujuba.storeserver.service;
 
+import com.renchaigao.zujuba.PageBean.StoreManagerBasicFragmentBean;
 import com.renchaigao.zujuba.domain.response.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +19,7 @@ public interface StoreService {
     ResponseEntity GetOneStoreGameInfo(String userId, String storeId);
 
     ResponseEntity ManagerGetOneStoreInfo(String userId, String storeId);
+    ResponseEntity ManagerUpdateOneStoreInfo(String userId, String storeId,StoreManagerBasicFragmentBean o);
 //
 //    ResponseEntity GetMyStore(String parameter, String userId, String placeId, String jsonObjectString);
 

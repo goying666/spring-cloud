@@ -157,7 +157,7 @@ public class AddStoreFunctions {
         StoreHardwareInfo storeHardwareInfo = new StoreHardwareInfo();
         storeHardwareInfo.setId(storeInfo.getId());
         DeskInfo deskInfo = new DeskInfo();
-        deskInfo.setMaxUserNum(storeInfo.getMaxPeopleSum());
+        deskInfo.setMaxUserNum(storeInfo.getMaxPeople());
         deskInfo.setMinUserNum(4);
         ArrayList<Photo> arrayListPhotos = new ArrayList<Photo>();
         Photo photo = new Photo();
